@@ -35,4 +35,8 @@ function backendresponse (url) {
 	});
 }
 
+app.get('/', (req, res) => {
+    res.sendStatus(200);
+});
+
 app.listen(port, () => console.log(`App listening on port ${port}!`))

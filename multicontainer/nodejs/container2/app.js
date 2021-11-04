@@ -12,4 +12,8 @@ app.get('/backendpoint', (req, res) => {
 	//res.status(200).send()
 })
 
+app.get('/', (req, res) => {
+    res.sendStatus(200);
+});
+
 app.listen(port, () => console.log(`App listening on port ${port}!`))
