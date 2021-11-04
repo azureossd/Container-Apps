@@ -1,0 +1,171 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+		"location": {
+		  "type": "string",
+		  "defaultValue": "canadacentral"
+		},
+		"environmentName": {
+		  "type": "string",
+		  "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+		},
+		"workspaceName": {
+		  "type": "string",
+		  "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
+		},
+		"workspaceLocation": {
+		  "type": "string",
+		  "defaultValue": "canadacentral"
+		},
+		"containerimage1": {
+		  "type": "string",
+		  "defaultValue": "docker.io/gfakedocker/daprservicefrontendnodejs:latest"
+		},
+		"containerimage2": {
+		  "type": "string",
+		  "defaultValue": "docker.io/gfakedocker/daprservicebackendnodejs:latest"
+		}
+	},
+    "variables": {
+	  "APP_PORT": "5000"
+	},
+    "resources": [
+		{
+		  "apiVersion": "2020-08-01",
+		  "name": "[parameters('workspaceName')]",
+		  "type": "Microsoft.OperationalInsights/workspaces",
+		  "location": "[parameters('workspaceLocation')]",
+		  "properties": {
+			"sku": {
+			  "name": "PerGB2018"
+			},
+			"retentionInDays": 30
+		  }
+		},
+		{
+		  "apiVersion": "2021-03-01",
+		  "name": "[parameters('environmentName')]",
+		  "type": "Microsoft.Web/kubeEnvironments",
+		  "location": "[parameters('location')]",
+		  "dependsOn": [
+			"[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+		  ],
+		  "properties": {
+			"type": "managed",
+			"internalLoadBalancerEnabled": false,
+			"appLogsConfiguration": {
+			  "destination": "log-analytics",
+			  "logAnalyticsConfiguration": {
+				"customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
+				"sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
+			  }
+			}
+		  }
+		},
+		{
+			"name": "httpfrontendservicenodejs",
+			"type": "Microsoft.Web/containerApps",
+			"apiVersion": "2021-03-01",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]"
+			],
+			"properties": {
+				"kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+				"configuration": {
+					"ingress": {
+						"external": true,
+						"targetPort": "[variables('APP_PORT')]"
+					}
+				},
+				"template": {
+					"containers": [
+						{
+							"name": "httpfrontendservicenodejs",
+							"image": "[parameters('containerimage1')]",
+							"env": [
+								{
+								  "name": "APP_PORT",
+								  "value": "[variables('APP_PORT')]"
+								}
+							]
+						}
+					],
+					"scale": {
+					  "minReplicas": 0,
+					  "maxReplicas": 5, 
+					  "rules": [
+						  {
+							"name": "httpscalingrule",
+							"http": {
+							  "metadata": {
+								"concurrentRequests": "100"
+							  }
+							}
+						  }
+					  ]
+					},
+					"dapr": {
+						"enabled": true,
+						"appPort": "[variables('APP_PORT')]",
+						"appId": "frontendapp"
+					}
+				}
+			}
+		},
+		{
+			"name": "httpbackendservicenodejs",
+			"type": "Microsoft.Web/containerApps",
+			"apiVersion": "2021-03-01",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"httpfrontendservicenodejs"
+			],
+			"properties": {
+				"kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+				"configuration": {
+					"ingress": {
+						"external": false,
+						"targetPort": "[variables('APP_PORT')]"
+					},
+					"secrets": [
+					]
+				},
+				"template": {
+					"containers": [
+						{
+							"name": "httpbackendservicenodejs",
+							"image": "[parameters('containerimage2')]",
+							"env": [
+								{
+								  "name": "APP_PORT",
+								  "value": "[variables('APP_PORT')]"
+								}
+							]
+						}
+					],
+					"scale": {
+					  "minReplicas": 0,
+					  "maxReplicas": 5, 
+					  "rules": [
+						  {
+							"name": "httpscalingrule",
+							"http": {
+							  "metadata": {
+								"concurrentRequests": "100"
+							  }
+							}
+						  }
+					  ]
+					},
+					"dapr": {
+						"enabled": true,
+						"appPort": "[variables('APP_PORT')]",
+						"appId": "backendapp"
+					}
+				}
+			}
+		}
+	]
+}

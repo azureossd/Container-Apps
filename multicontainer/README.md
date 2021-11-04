@@ -15,7 +15,7 @@ The Container App Environment houses the Container Apps.
 
 A Container App that contains two containers and an HTTP Ingress controller
 - A frontend container that listens internally on port 4000, which the Ingress controller forwards HTTP traffic to.
-- A backend container, which listens internally on port 5000. This port is exposed so that the frontend container can send traffic to it.
+- A backend container, which listens internally on port 5000. This port is exposed via its Docker configuration so that the frontend container can send traffic to it.
 
 The docker images are already built and publically accessible and configured as defaults in the template, but you can modify the source code and dockerfile and publish to your own container registry.
 
