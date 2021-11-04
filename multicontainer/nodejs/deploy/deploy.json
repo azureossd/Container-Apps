@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "northcentralusstage",
+            "type": "String"
+        },
+        "environment_id": {
+            "type": "String"
+        },
+		"containerimage1": {
+            "type": "String"
+        },
+		"containerimage2": {
+            "type": "String"
+        }		
+    },
+    "variables": {},
+    "resources": [
+    {
+        "apiVersion": "2021-03-01",
+        "name": "multicontainer",
+        "type": "Microsoft.Web/containerApps",
+        "kind": "workerapp",
+        "location": "[parameters('location')]",
+        "properties": {
+            "kubeEnvironmentId": "[parameters('environment_id')]",
+            "configuration": {
+                "ingress": {
+                    "external": true,
+                    "targetPort": 4000
+                },
+				"secrets": [
+				]
+            },
+            "template": {
+				"containers": [
+				{
+					"name": "httpservice1nodejs",
+					"image": "[parameters('containerimage1')]",
+					"env": [
+					]
+				},
+				{
+					"name": "httpservice2nodejs",
+					"image": "[parameters('containerimage2')]",
+					"env": [
+					]
+				}
+				],
+                "dapr": {
+                    "enabled": true,
+					"appPort": 5000,
+					"appId": "backendapp",
+					"components": [
+					]
+                }
+            }
+        }
+    }]
+}
