@@ -28,10 +28,11 @@ There are two Docker files:
 
 MyActor.sln contains all three projects: MyActorService, MyActor.Interfaces, and MyActorClient.
 
-To demonstrate that the Dapr client Container App is able to perform operations on the Actor in the Actor service Container App, make a request to the following URL on the client Container App (replacing <DaprClientContainerAppName>>.<FQDNSuffix> with your Container App's domain):
-https://<DaprClientContainerAppName>.<FQDNSuffix>
+To demonstrate that the Dapr client Container App is able to perform operations on the Actor in the Actor service Container App, make a request to the following URL on the client Container App (replacing *DaprClientContainerAppName*.*FQDNSuffix* with your Container App's domain):
+https://*DaprClientContainerAppName*.*FQDNSuffix*
 
 If the communication with the Actor is successful, the client site page will render the following text:
+
 PropertyA: **ValueA**
 PropertyB: **ValueB**
 
