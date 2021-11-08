@@ -1,0 +1,319 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+		"location": {
+		  "type": "string",
+		  "defaultValue": "canadacentral"
+		},
+		"environmentName": {
+		  "type": "string",
+		  "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+		},
+		"workspaceName": {
+		  "type": "string",
+		  "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
+		},
+		"workspaceLocation": {
+		  "type": "string",
+		  "defaultValue": "canadacentral"
+		},
+		"publishercontainerimage": {
+		  "type": "string",
+		  "defaultValue": "docker.io/gfakedocker/publishernodejs:latest"
+		},
+		"consumer1containerimage": {
+		  "type": "string",
+		  "defaultValue": "docker.io/gfakedocker/consumer1nodejs:latest"
+		},
+		"consumer2containerimage": {
+		  "type": "string",
+		  "defaultValue": "docker.io/gfakedocker/consumer2nodejs:latest"
+		},
+		"serviceBusNamespaceName": {
+		  "type": "string",
+		  "defaultValue": "[format('serviceBusNS-{0}', uniqueString(resourceGroup().id))]",
+		  "metadata": {
+			"description": "Name of the Service Bus namespace"
+		  }
+		},
+		"serviceBusTopicName": {
+		  "type": "string",
+		  "defaultValue": "mytopic1",
+		  "metadata": {
+			"description": "Name of the Topic"
+		  }
+		}
+  },
+  "variables": {
+    "APP_PORT": "5000",
+    "policy": "policy1",
+	"pubsubname": "mypubsub1"
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-01-01-preview",
+      "name": "[parameters('serviceBusNamespaceName')]",
+      "type": "Microsoft.ServiceBus/namespaces",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+	  }
+    },
+	{
+        "apiVersion": "2017-04-01",
+        "name": "[concat(parameters('serviceBusNamespaceName'), '/', parameters('serviceBusTopicName'))]",
+        "type": "Microsoft.ServiceBus/namespaces/topics",
+        "dependsOn": [
+          "[resourceId('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]"
+        ],
+        "properties": {
+          "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+          "maxSizeInMegabytes": 1024,
+          "requiresDuplicateDetection": false,
+          "duplicateDetectionHistoryTimeWindow": "PT10M",
+          "enableBatchedOperations": false,
+          "supportOrdering": false,
+          "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+          "enablePartitioning": false,
+          "enableExpress": false
+        }
+	},
+	{
+		"apiVersion": "2017-04-01",
+		"name": "[concat(parameters('serviceBusNamespaceName'), '/', parameters('serviceBusTopicName'), '/', variables('policy'))]",
+		"type": "Microsoft.ServiceBus/namespaces/topics/authorizationRules",
+		"dependsOn": [
+			"[resourceId('Microsoft.ServiceBus/namespaces/topics/', parameters('serviceBusNamespaceName'), parameters('serviceBusTopicName'))]"
+		],
+		"properties": {
+			"Rights": [
+				"Send",
+				"Listen",
+				"Manage"
+			]
+		}
+	},
+    {
+      "apiVersion": "2020-08-01",
+      "name": "[parameters('workspaceName')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "[parameters('workspaceLocation')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "apiVersion": "2021-03-01",
+      "name": "[parameters('environmentName')]",
+      "type": "Microsoft.Web/kubeEnvironments",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+      ],
+      "properties": {
+        "type": "managed",
+        "internalLoadBalancerEnabled": false,
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
+            "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
+          }
+        }
+      }
+    },
+    {
+      "name": "publisher",
+      "type": "Microsoft.Web/containerApps",
+      "apiVersion": "2021-03-01",
+      "kind": "containerapp",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+		"[resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules/', parameters('serviceBusNamespaceName'), parameters('serviceBusTopicName'), variables('policy'))]"
+      ],
+      "properties": {
+        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT')]"
+          },
+          "secrets": [
+			{
+                "name": "connectionstringsecret",
+                "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceNAme'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "publisher",
+              "image": "[parameters('publishercontainerimage')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT')]"
+                },
+                {
+                  "name": "SB_TOPIC",
+                  "value": "[parameters('serviceBusTopicName')]"
+                },
+                {
+                  "name": "PUBSUB_NAME",
+                  "value": "[variables('pubsubname')]"
+                }
+              ]
+            }
+          ],
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "publisher",
+            "components": [
+              {
+                "name": "[variables('pubsubname')]",
+                "type": "pubsub.azure.servicebus",
+                "version": "v1",
+                "metadata": [
+                  {
+                    "name": "connectionString",
+                    "secretRef": "connectionstringsecret"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "consumer1",
+      "type": "Microsoft.Web/containerApps",
+      "apiVersion": "2021-03-01",
+      "kind": "containerapp",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+		"[resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules/', parameters('serviceBusNamespaceName'), parameters('serviceBusTopicName'), variables('policy'))]"
+      ],
+      "properties": {
+        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "secrets": [
+			{
+                "name": "connectionstringsecret",
+                "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceNAme'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "consumer1",
+              "image": "[parameters('consumer1containerimage')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT')]"
+                },
+                {
+                  "name": "SB_TOPIC",
+                  "value": "[parameters('serviceBusTopicName')]"
+                },
+                {
+                  "name": "PUBSUB_NAME",
+                  "value": "[variables('pubsubname')]"
+                }
+              ]
+            }
+          ],
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "consumer1",
+            "components": [
+              {
+                "name": "[variables('pubsubname')]",
+                "type": "pubsub.azure.servicebus",
+                "version": "v1",
+                "metadata": [
+                  {
+                    "name": "connectionString",
+                    "secretRef": "connectionstringsecret"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "consumer2",
+      "type": "Microsoft.Web/containerApps",
+      "apiVersion": "2021-03-01",
+      "kind": "containerapp",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Web/containerApps/', 'consumer1')]"
+      ],
+      "properties": {
+        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "secrets": [
+			{
+                "name": "connectionstringsecret",
+                "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceNAme'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "consumer2",
+              "image": "[parameters('consumer2containerimage')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT')]"
+                },
+                {
+                  "name": "SB_TOPIC",
+                  "value": "[parameters('serviceBusTopicName')]"
+                },
+                {
+                  "name": "PUBSUB_NAME",
+                  "value": "[variables('pubsubname')]"
+                }
+              ]
+            }
+          ],
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "consumer2",
+            "components": [
+              {
+                "name": "[variables('pubsubname')]",
+                "type": "pubsub.azure.servicebus",
+                "version": "v1",
+                "metadata": [
+                  {
+                    "name": "connectionString",
+                    "secretRef": "connectionstringsecret"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

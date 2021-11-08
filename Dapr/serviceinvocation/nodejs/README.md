@@ -1,4 +1,4 @@
-# Container App Environment and Container App
+# Dapr service-to-service with Container Apps
 This sample Azure Resource Manager template deploys a Container App Environment and two Container Apps which use Dapr service-to-service invocation to communicate with each other.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fserviceinvocation%2Fnodejs%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fserviceinvocation%2Fnodejs%2Fdeploy%2Fazuredeploy.json)
@@ -19,5 +19,5 @@ The Container App Environment houses the Container Apps.
 
 The docker images are already built and publically accessible and configured as defaults in the template, but you can modify the source code and dockerfiles and publish to your own container registry.
 
-To demonstrate that the frontend Container App is able to communicate with the backend Container App, make a request to the following URL on the frontend Container App (replacing <ContainerAppName>.<FQDNSuffix> with your Container App's domain):
+To demonstrate that the frontend Container App is able to communicate with the backend Container App, make a request to the following URL on the frontend Container App (replacing <FrontEndContainerAppName>.<FQDNSuffix> with your Container App's domain):
 https://<FrontEndContainerAppName>.<FQDNSuffix>/frontendpoint
