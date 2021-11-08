@@ -18,19 +18,87 @@
 		  "type": "string",
 		  "defaultValue": "canadacentral"
 		},
+		"redisCacheName": {
+		  "type": "string",
+		  "defaultValue": "[format('redisCache-{0}', uniqueString(resourceGroup().id))]",
+		  "metadata": {
+			"description": "Specify the name of the Azure Redis Cache to create."
+		  }
+		},
+		"redisCacheSKU": {
+		  "type": "string",
+		  "defaultValue": "Basic",
+		  "allowedValues": [
+			"Basic",
+			"Standard",
+			"Premium"
+		  ],
+		  "metadata": {
+			"description": "Specify the pricing tier of the new Azure Redis Cache."
+		  }
+		},
+		"redisCacheFamily": {
+		  "type": "string",
+		  "defaultValue": "C",
+		  "allowedValues": [
+			"C",
+			"P"
+		  ],
+		  "metadata": {
+			"description": "Specify the family for the sku. C = Basic/Standard, P = Premium."
+		  }
+		},
+		"redisCacheCapacity": {
+		  "type": "int",
+		  "defaultValue": 1,
+		  "allowedValues": [
+			0,
+			1,
+			2,
+			3,
+			4,
+			5,
+			6
+		  ],
+		  "metadata": {
+			"description": "Specify the size of the new Azure Redis Cache instance. Valid values: for C (Basic/Standard) family (0, 1, 2, 3, 4, 5, 6), for P (Premium) family (1, 2, 3, 4)"
+		  }
+		},
+		"enableNonSslPort": {
+		  "type": "bool",
+		  "defaultValue": false,
+		  "metadata": {
+			"description": "Specify a boolean value that indicates whether to allow access via non-SSL ports."
+		  }
+		},
 		"containerimage1": {
 		  "type": "string",
-		  "defaultValue": "docker.io/gfakedocker/daprservicebackendnodejs:latest"
+		  "defaultValue": "docker.io/gfakedocker/actorservicedotnet:latest"
 		},
 		"containerimage2": {
 		  "type": "string",
-		  "defaultValue": "docker.io/gfakedocker/daprservicefrontendnodejs:latest"
+		  "defaultValue": "docker.io/gfakedocker/actorclientdotnet:latest"
 		}
 	},
     "variables": {
 	  "APP_PORT": "5000"
 	},
     "resources": [
+		{
+		  "type": "Microsoft.Cache/redis",
+		  "apiVersion": "2020-06-01",
+		  "name": "[parameters('redisCacheName')]",
+		  "location": "[parameters('location')]",
+		  "properties": {
+			"enableNonSslPort": "[parameters('enableNonSslPort')]",
+			"minimumTlsVersion": "1.2",
+			"sku": {
+			  "capacity": "[parameters('redisCacheCapacity')]",
+			  "family": "[parameters('redisCacheFamily')]",
+			  "name": "[parameters('redisCacheSKU')]"
+			}
+		  }
+		},
 		{
 		  "apiVersion": "2020-08-01",
 		  "name": "[parameters('workspaceName')]",
@@ -64,12 +132,13 @@
 		  }
 		},
 		{
-			"name": "httpbackendservice",
+			"name": "myactorservice",
 			"type": "Microsoft.Web/containerApps",
 			"apiVersion": "2021-03-01",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]"
+				"[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+				"[parameters('redisCacheName')]"
 			],
 			"properties": {
 				"kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
@@ -79,23 +148,25 @@
 						"targetPort": "[variables('APP_PORT')]"
 					},
 					"secrets": [
+						{
+							"name": "redishostsecret",
+							"value": "[concat(reference(parameters('redisCacheName')).hostName, ':6380')]"
+						},
+						{
+							"name": "redispasswordsecret",
+							"value": "[listKeys(parameters('redisCacheName'), '2020-12-01').secondaryKey]"
+						}
 					]
 				},
 				"template": {
 					"containers": [
 						{
-							"name": "httpbackendservice",
-							"image": "[parameters('containerimage1')]",
-							"env": [
-								{
-								  "name": "APP_PORT",
-								  "value": "[variables('APP_PORT')]"
-								}
-							]
+							"name": "myactorservice",
+							"image": "[parameters('containerimage1')]"
 						}
 					],
 					"scale": {
-					  "minReplicas": 0,
+					  "minReplicas": 1,
 					  "maxReplicas": 5, 
 					  "rules": [
 						  {
@@ -106,23 +177,48 @@
 							  }
 							}
 						  }
-					  ]
+						]
 					},
 					"dapr": {
 						"enabled": true,
 						"appPort": "[variables('APP_PORT')]",
-						"appId": "backendapp"
+						"appId": "myactorservice",
+						"components": [
+							{
+							  "name": "mystatestore",
+							  "type": "state.redis",
+							  "version": "v1",
+							  "metadata": [
+								{
+								  "name": "redisHost",
+								  "secretRef": "redishostsecret"
+								},
+								{
+								  "name": "redisPassword",
+								  "secretRef": "redispasswordsecret"
+								},
+								{
+								  "name": "enableTLS",
+								  "value": "true"
+								},
+								{
+								  "name": "actorStateStore",
+								  "value": "true"
+								}
+							  ]
+							}
+						]
 					}
 				}
 			}
 		},
 		{
-			"name": "httpfrontendservice",
+			"name": "myactorclient",
 			"type": "Microsoft.Web/containerApps",
 			"apiVersion": "2021-03-01",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"httpbackendservice"
+				"myactorservice"
 			],
 			"properties": {
 				"kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
@@ -130,39 +226,27 @@
 					"ingress": {
 						"external": true,
 						"targetPort": "[variables('APP_PORT')]"
-					}
+					},
+					"secrets": [
+					]
 				},
 				"template": {
 					"containers": [
 						{
-							"name": "httpfrontendservice",
+							"name": "myactorclient",
 							"image": "[parameters('containerimage2')]",
 							"env": [
 								{
-								  "name": "APP_PORT",
-								  "value": "[variables('APP_PORT')]"
+									"name": "ASPNETCORE_ENVIRONMENT",
+									"value": "Production"
 								}
 							]
 						}
 					],
-					"scale": {
-					  "minReplicas": 0,
-					  "maxReplicas": 5, 
-					  "rules": [
-						  {
-							"name": "httpscalingrule",
-							"http": {
-							  "metadata": {
-								"concurrentRequests": "100"
-							  }
-							}
-						  }
-					  ]
-					},
 					"dapr": {
 						"enabled": true,
 						"appPort": "[variables('APP_PORT')]",
-						"appId": "frontendapp"
+						"appId": "myactorclient"
 					}
 				}
 			}
