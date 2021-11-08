@@ -23,8 +23,8 @@ An Azure Service Bus Topic is used as the Dapr pub-sub component to broker messa
 
 
 To demonstrate that the Publisher is able to send messages to the pub/sub broker and the Consumers are able to receive messages from the pub/sub broker, do the following:
-1. Use a REST client to make the following request to the Publisher Container App (replacing <PublisherContainerAppName>>.<FQDNSuffix> with your Container App's domain):
-https://*PublisherContainerAppName*.*FQDNSuffix*/
+1. Use a REST client to make the following request to the Publisher Container App (replacing *PublisherContainerAppName*.*FQDNSuffix* with your Container App's domain):
+
 POST https://*PublisherContainerAppName*.*FQDNSuffix*/publish
 
 Headers:

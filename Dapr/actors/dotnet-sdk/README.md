@@ -32,6 +32,7 @@ To demonstrate that the Dapr client Container App is able to perform operations 
 https://*DaprClientContainerAppName*.*FQDNSuffix*
 
 If the communication with the Actor is successful, the client site page will render the following text:
+
 PropertyA: **ValueA**
 PropertyB: **ValueB**
 
