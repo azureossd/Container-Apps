@@ -19,5 +19,5 @@ A Container App that contains two containers and an HTTP Ingress controller
 
 The docker images are already built and publically accessible and configured as defaults in the template, but you can modify the source code and dockerfile and publish to your own container registry.
 
-To demonstrate that the frontend container is able to communicate with the backend container, make a request to the following URL (replacing <ContainerAppName>.<FQDNSuffix> with your Container App's domain):
-https://<ContainerAppName>.<FQDNSuffix>/frontendpoint
+To demonstrate that the frontend container is able to communicate with the backend container, make a request to the following URL (replacing *ContainerAppName*.*FQDNSuffix* with your Container App's domain):
+https://*ContainerAppName*.*FQDNSuffix*/frontendpoint

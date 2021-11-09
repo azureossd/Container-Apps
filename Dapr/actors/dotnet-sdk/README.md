@@ -34,6 +34,7 @@ https://*DaprClientContainerAppName*.*FQDNSuffix*
 If the communication with the Actor is successful, the client site page will render the following text:
 
 PropertyA: **ValueA**
+
 PropertyB: **ValueB**
 
 If the communication with the Actor is not successful, the client site page will render the following text:
