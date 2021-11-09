@@ -19,5 +19,5 @@ The Container App Environment houses the Container Apps.
 
 The docker images are already built and publically accessible and configured as defaults in the template, but you can modify the source code and dockerfiles and publish to your own container registry.
 
-To demonstrate that the frontend Container App is able to communicate with the backend Container App, make a request to the following URL on the frontend Container App (replacing <FrontEndContainerAppName>.<FQDNSuffix> with your Container App's domain):
-https://<FrontEndContainerAppName>.<FQDNSuffix>/frontendpoint
+To demonstrate that the frontend Container App is able to communicate with the backend Container App, make a request to the following URL on the frontend Container App (replacing *FrontEndContainerAppName*.*FQDNSuffix* with your Container App's domain):
+https://*FrontEndContainerAppName*.*FQDNSuffix*/frontendpoint
