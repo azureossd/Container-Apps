@@ -1,5 +1,5 @@
 {
-  "name": "binding-example01",
+  "name": "containerapp1",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -15,3 +15,4 @@
     "request": "^2.88.2"
   }
 }
+

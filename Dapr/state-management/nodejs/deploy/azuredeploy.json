@@ -158,7 +158,13 @@
 					"containers": [
 						{
 							"name": "statefulapp",
-							"image": "[parameters('containerimage1')]"
+							"image": "[parameters('containerimage1')]",
+							"env": [
+								{
+								  "name": "APP_PORT",
+								  "value": "[variables('APP_PORT')]"
+								}
+							]
 						}
 					],
 					"scale": {
