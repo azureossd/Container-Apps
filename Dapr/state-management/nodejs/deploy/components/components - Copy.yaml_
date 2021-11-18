@@ -1,0 +1,10 @@
+- name: mystatestore
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    secretRef: redishostsecret
+  - name: redisPassword
+    secretRef: redispasswordsecret
+  - name: enableTLS
+    value: "true"
