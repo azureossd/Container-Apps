@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const app = express()
 app.use(bodyParser.json())
 
-const port = process.env.DAPR_HTTP_PORT || 5000
+const port = process.env.APP_PORT || 5000
 
 app.get('/backendpoint', (req, res) => {
     console.log('executing backendpoint method')
