@@ -96,7 +96,7 @@
 							"env": [
 								{
 								  "name": "APP_PORT",
-								  "value": "4000"
+								  "value": "5000"
 								}
 							]
 						}
