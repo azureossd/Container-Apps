@@ -28,3 +28,18 @@ https://*ContainerAppName*.*FQDNSuffix*/writestatestore
 3. Make a GET request to the following URL (replacing *ContainerAppName*.*FQDNSuffix* with your Container App's domain):
 https://*ContainerAppName*.*FQDNSuffix*/readstatestore
 4. Verify that this is the same value that was rendered in step 2.
+
+You can also use the Azure CLI to deploy the Container App. A Container App-schema components yaml file named components.yaml is located under the **deploy** folder. Please note that for Container Apps, the yaml file does not use the Dapr schema. To create the Container App via the CLI, you will need an existing Container App Environment and Azure Redis instance. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI. Refer to the [Manage Azure Cache for Redis with CLI documentation](https://docs.microsoft.com/azure/azure-cache-for-redis/cli-samples) for information about how to create the Redis cache via CLI. To create the Container App via the CLI, replace the all-capitalized values below and then run the following command from the directory that contains the **deploy** folder:
+
+```
+az containerapp create --name YOURCONTAINERAPPNAME --resource-group YOURRESOURCEGROUPNAME --environment YOURCONTAINERAPPENVIRONMENTNAME --image docker.io/gfakedocker/statefulappnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets 'redishostsecret="YOURREDISHOSTNAME.redis.cache.windows.net:6380",redispasswordsecret=YOURREDISPASSWORD"' --environment-variables 'APP_PORT=5000' --enable-dapr --dapr-app-port 5000 --dapr-app-id statefulapp --dapr-components ./deploy/components.yaml
+
+```
+
+A Dapr-schema components yaml file named redisStateStore.yaml is located under the **components** folder, if you want to run the application locally. This component file uses the local Redis instance that is part of the Dapr self-hosted installation. Refer to the [Dapr documentation](https://docs.dapr.io/getting-started/) on how to run an application in Dapr self-hosted mode.
+
+Here is a sample command that runs an application locally in Dapr self-hosted mode:
+
+```
+dapr run --app-id app1 --app-port 5000 --dapr-http-port 3500 node app.js --components-path ./components
+```
