@@ -1,5 +1,5 @@
 # Dapr State Management with Container Apps
-This sample Azure Resource Manager template deploys a Container App Environment and a Container Apps that uses which use Dapr state management.
+This sample Azure Resource Manager template deploys a Container App Environment and a Container App that uses Dapr state management.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fstate-management%2Fnodejs%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fstate-management%2Fnodejs%2Fdeploy%2Fazuredeploy.json)
 
@@ -15,7 +15,7 @@ The Container App Environment houses the Container Apps.
 
 An Azure Redis Cache is used as the Dapr state store. You can use [any supported state store](https://docs.dapr.io/reference/components-reference/supported-state-stores/). 
 
-### Container Apps
+### Container App
 
 A Container App that uses Dapr state management. This Container App uses an external Ingress controller so that you can test the state store functionality via direct web requests.
 - Making a GET request to the /writestatestore controller invokes an outbound POST request to the Dapr state API to write to the state store. It writes the current date/time to a key named "fakekey1".
@@ -29,10 +29,10 @@ https://*ContainerAppName*.*FQDNSuffix*/writestatestore
 https://*ContainerAppName*.*FQDNSuffix*/readstatestore
 4. Verify that this is the same value that was rendered in step 2.
 
-You can also use the Azure CLI to deploy the Container App. A Container App-schema components yaml file named components.yaml is located under the **deploy** folder. Please note that for Container Apps, the yaml file does not use the Dapr schema. To create the Container App via the CLI, you will need an existing Container App Environment and Azure Redis instance. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI. Refer to the [Manage Azure Cache for Redis with CLI documentation](https://docs.microsoft.com/azure/azure-cache-for-redis/cli-samples) for information about how to create the Redis cache via CLI. To create the Container App via the CLI, replace the all-capitalized values below and then run the following command from the directory that contains the **deploy** folder:
+You can also use the Azure CLI to deploy the Container App. A Container App-schema components yaml file named components.yaml is located under the **deploy** folder. Please note that for Container Apps, the yaml file does not use the Dapr schema. To create the Container App via the CLI, you will need an existing Container App Environment and Azure Redis instance. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI. Refer to the [Manage Azure Cache for Redis with CLI documentation](https://docs.microsoft.com/azure/azure-cache-for-redis/cli-samples) for information about how to create the Redis cache via CLI. To create the Container App via the CLI, replace the bracketed values below (and remove the brackets) and then run the following command from the directory that contains the **deploy** folder:
 
 ```
-az containerapp create --name YOURCONTAINERAPPNAME --resource-group YOURRESOURCEGROUPNAME --environment YOURCONTAINERAPPENVIRONMENTNAME --image docker.io/gfakedocker/statefulappnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets 'redishostsecret="YOURREDISHOSTNAME.redis.cache.windows.net:6380",redispasswordsecret=YOURREDISPASSWORD"' --environment-variables 'APP_PORT=5000' --enable-dapr --dapr-app-port 5000 --dapr-app-id statefulapp --dapr-components ./deploy/components.yaml
+az containerapp create --name <MYCONTAINERAPPNAME> --resource-group <MYRESOURCEGROUPNAME> --environment <MYCONTAINERAPPENVIRONMENTNAME> --image docker.io/gfakedocker/statefulappnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets 'redishostsecret="<MYREDISHOSTNAME>.redis.cache.windows.net:6380",redispasswordsecret=<MYREDISKEY>"' --environment-variables 'APP_PORT=5000' --enable-dapr --dapr-app-port 5000 --dapr-app-id statefulapp --dapr-components ./deploy/components.yaml
 
 ```
 

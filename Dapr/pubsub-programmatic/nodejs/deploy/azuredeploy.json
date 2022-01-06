@@ -146,7 +146,7 @@
           "secrets": [
 			{
                 "name": "connectionstringsecret",
-                "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceNAme'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
+                "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceName'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
             }
           ]
         },
