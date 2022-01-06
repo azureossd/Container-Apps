@@ -1,0 +1,24 @@
+- name: mybindingforinput
+  type: bindings.azure.servicebusqueues
+  version: v1
+  metadata:
+  - name: connectionString
+    secretRef: sbconn1secret
+  - name: queueName
+    value: mysbqueue1
+  - name: queue
+    value: inputmessage
+  - name: ttlInSeconds
+    value: 60
+- name: mybindingforoutput
+  type: bindings.azure.storagequeues
+  version: v1
+  metadata:
+  - name: storageAccount
+    secretRef: storagename1secret
+  - name: storageAccessKey
+    secretRef: storageconn1secret
+  - name: queue
+    value: mystorequeue1
+  - name: ttlInSeconds
+    value: 600
