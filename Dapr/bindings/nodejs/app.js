@@ -14,12 +14,12 @@ json: true
 };
 
 //The name of this controller matches the metadata name of a Dapr binding component
-//Dapr will automatically make a request to this route when it detects a message in the provider you specify
+//Dapr will automatically make a request to this route when it detects a message in the provider you specify in the mybindingforinput Dapr binding component
 app.post('/mybindingforinput', (req, res) => {
 	res.setHeader('Content-Type', 'application/json');
     console.log('/mybindingforinput controller was triggered via Dapr input binding. Message data: ' + JSON.stringify(req.body))
 	
-	// When the mybindingforinput binding component is triggered, this route will be invoked. In turn, this route will make a request to the Dapr binding route for mybindingforoutput, which will invoke the specified output binding.
+	// Make an outbound request to the Dapr binding route for mybindingforoutput, which will invoke the specified output binding.
 
     options.body = { data: JSON.stringify(req.body), operation: 'create'};
 
@@ -27,7 +27,6 @@ app.post('/mybindingforinput', (req, res) => {
 	if (err) {
 		return console.log(err);
 	}
-	console.log('mybindingforinput route made an outbound request to Dapr output binding endpoint for mybindingforoutput');
 	});
 	
     res.status(200).send()
@@ -45,8 +44,6 @@ app.get('/myroute', (req, res) => {
 	if (err) {
 		return console.log(err);
 	}
-
-	console.log('MyRoute made an outbound request to http://localhost:3500/v1.0/bindings/mybindingforoutput to use the output binding')
 	});
 	
 	res.status(200).send()
@@ -56,4 +53,4 @@ app.get('/', (req, res) => {
   res.sendStatus(200);
 });
 
-app.listen(port, () => console.log(`Binding app listening on port ${port}!`))
+app.listen(port, () => console.log(`App listening on port ${port}!`))
