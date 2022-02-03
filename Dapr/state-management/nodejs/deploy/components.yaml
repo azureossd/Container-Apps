@@ -1,10 +1,10 @@
 - name: mystatestore
-  type: state.redis
+  type: state.azure.blobstorage
   version: v1
   metadata:
-  - name: redisHost 
-    secretRef: redishostsecret
-  - name: redisPassword
-    secretRef: redispasswordsecret
-  - name: enableTLS
-    value: "true"
+  - name: accountName
+    secretRef: storageaccountnamesecret
+  - name: accountKey
+    secretRef: storageaccountkeysecret
+  - name: containerName
+    value: myblobcontainer1

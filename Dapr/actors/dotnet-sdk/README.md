@@ -13,7 +13,7 @@ The Container App Environment houses the Container Apps.
 
 ### Azure Redis Cache
 
-An Azure Redis Cache is used as the Dapr state store for the Actor. You can use [any supported state store](https://docs.dapr.io/reference/components-reference/supported-state-stores/). 
+An Azure Redis Cache is used as the Dapr state store for the Actor. You can use [any supported state store that supports mult-item transactions](https://docs.microsoft.com/dotnet/architecture/dapr-for-net-developers/actors#state-persistence). 
 
 ### Container Apps
 
