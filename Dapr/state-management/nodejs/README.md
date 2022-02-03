@@ -11,9 +11,9 @@ A log Analytics workspace is deployed, which is required for the Container App E
 
 The Container App Environment houses the Container Apps.
 
-### Azure Redis Cache
+### Azure Storage Account Blob Container
 
-An Azure Redis Cache is used as the Dapr state store. You can use [any supported state store](https://docs.dapr.io/reference/components-reference/supported-state-stores/). 
+An Azure Storage Account Blob Container is used as the Dapr state store. You can use [any supported state store](https://docs.dapr.io/reference/components-reference/supported-state-stores/). 
 
 ### Container App
 
@@ -32,7 +32,7 @@ https://*ContainerAppName*.*FQDNSuffix*/readstatestore
 You can also use the Azure CLI to deploy the Container App. A Container App-schema components yaml file named components.yaml is located under the **deploy** folder. Please note that for Container Apps, the yaml file does not use the Dapr schema. To create the Container App via the CLI, you will need an existing Container App Environment and Azure Redis instance. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI. Refer to the [Manage Azure Cache for Redis with CLI documentation](https://docs.microsoft.com/azure/azure-cache-for-redis/cli-samples) for information about how to create the Redis cache via CLI. To create the Container App via the CLI, replace the bracketed values below (and remove the brackets) and then run the following command from the directory that contains the **deploy** folder:
 
 ```
-az containerapp create --name <MYCONTAINERAPPNAME> --resource-group <MYRESOURCEGROUPNAME> --environment <MYCONTAINERAPPENVIRONMENTNAME> --image docker.io/gfakedocker/statefulappnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets 'redishostsecret="<MYREDISHOSTNAME>.redis.cache.windows.net:6380",redispasswordsecret=<MYREDISKEY>"' --environment-variables 'APP_PORT=5000' --enable-dapr --dapr-app-port 5000 --dapr-app-id statefulapp --dapr-components ./deploy/components.yaml
+az containerapp create --name <MYCONTAINERAPPNAME> --resource-group <MYRESOURCEGROUPNAME> --environment <MYCONTAINERAPPENVIRONMENTNAME> --image docker.io/gfakedocker/statefulappnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets "storageaccountnamesecret=${STORAGE_ACCOUNT},storageaccountkeysecret=${STORAGE_ACCOUNT_KEY}" --environment-variables 'APP_PORT=5000' --enable-dapr --dapr-app-port 5000 --dapr-app-id statefulapp --dapr-components ./deploy/components.yaml
 
 ```
 

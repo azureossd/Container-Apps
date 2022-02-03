@@ -49,6 +49,6 @@ $sbconn1secret = 'Endpoint=sb://<MYSERVICEBUSNAMESPACE>.servicebus.windows.net/;
 $storagename1secret='<MYSTORAGEACCOUNTNAME>';
 $storageconn1secret='<MYSTORAGEACCOUNTACCESSKEY>';
 
-az containerapp create --name <MYCONTAINERAPPNAME> --resource-group <MYRESOURCEGROUPNAME> --environment <MYCONTAINERAPPENVIRONMENTNAME> --image docker.io/gfakedocker/bindingnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets "sbconn1secret=${sbconn1secret},storagename1secret=${storagename1secret},storageconn1secret=${storageconn1secret}" --environment-variables "APP_PORT=5000" --enable-dapr --dapr-app-port 5000 --dapr-app-id bindingnodejs --dapr-components ./deploy/components.yaml
+az containerapp create --name <MYCONTAINERAPPNAME> --resource-group <MYRESOURCEGROUPNAME> --environment <MYCONTAINERAPPENVIRONMENTNAME> --image docker.io/gfakedocker/bindingnodejs:latest --target-port 5000 --ingress external --min-replicas 1 --max-replicas 1 --secrets "sbconn1secret=$sbconn1secret,storagename1secret=$storagename1secret,storageconn1secret=$storageconn1secret" --environment-variables "APP_PORT=5000" --enable-dapr --dapr-app-port 5000 --dapr-app-id bindingnodejs --dapr-components ./deploy/components.yaml
 
 ```
