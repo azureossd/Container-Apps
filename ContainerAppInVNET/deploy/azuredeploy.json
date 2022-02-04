@@ -136,7 +136,7 @@
       }
     },
     {
-      "condition": "[equals(string(and(parameters('deployToVnet'), parameters('internalOnly'))), 'True')]",
+      "condition": "[equals(string(and(and(parameters('deployToVnet'), parameters('internalOnly')), parameters('privateDNS')), 'True')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "dnsZoneTemplate",
