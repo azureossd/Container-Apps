@@ -1,7 +1,7 @@
 # Container App Environment with VNET
 This sample Azure Resource Manager template deploys an Azure Container App Environment to an Azure Virtual Network. For more information about deploying a Container App Environment to a virtual network, refer to [this documentation](https://docs.microsoft.com/azure/container-apps/vnet-custom?tabs=powershell&pivots=azure-cli#deploy-with-a-private-dns).
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fgabesmsft%2FContainer-Apps%2Fmaster%2FContainerAppInVNET%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fgabesmsft%2FContainer-Apps%2Fmaster%2FContainerAppInVNET%2Fdeploy%2Fazuredeploy.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppInVNET%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppInVNET%2Fdeploy%2Fazuredeploy.json)
 
 ### Log Analytics Workspace
 
