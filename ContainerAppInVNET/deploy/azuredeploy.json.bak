@@ -95,7 +95,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/gabesmsft/Container-Apps/master/ContainerAppInVNET/deploy/nested/environment.json,
+          "uri": "https://raw.githubusercontent.com/gabesmsft/Container-Apps/ContainerAppInVNET/master/deploy/nested/environment.json",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
