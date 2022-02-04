@@ -1,0 +1,172 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "defaultValue": "canadacentral",
+      "type": "String",
+      "metadata": {
+        "description": "The location into which the resources should be deployed."
+      }
+    },
+    "deployToVnet": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployToVnet parameter to true, a virtual network will be deployed and the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
+      }
+    },
+    "internalOnly": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployToVnet and internalOnly parameters to true, the Container App Environment will only be reachable privately through the virtual network."
+      }
+    },
+    "privateDNS": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployToVnet, internalOnly, and privateDNS parameters to true, a private DNS zone will be deployed for the Container App Environment."
+      }
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the Container App Environment."
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the Log Analytics Workspace."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "[format('vnet-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the virtual network."
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "The IP address space used for the virtual network."
+      }
+    },
+    "controlPlaneSubnetName": {
+      "type": "string",
+      "defaultValue": "control-plane",
+      "metadata": {
+        "description": "Subnet name for control plane infrastructure components and user app containers."
+      }
+    },
+    "appsSubnetName": {
+      "type": "string",
+      "defaultValue": "applications",
+      "metadata": {
+        "description": "Subnet name for  user app containers. Subnet that contains IP ranges mapped to applications deployed as containers."
+      }
+    },
+    "controlPlaneSubnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/21",
+      "metadata": {
+        "description": "Subnet CIDR range for control plane infrastructure components and user app containers."
+      }
+    },
+    "appsSubnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.8.0/21",
+      "metadata": {
+        "description": "Subnet CIDR range for user app containers. Subnet that contains IP ranges mapped to applications deployed as containers."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "environmentTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/gabesmsft/Container-Apps/ContainerAppInVNET/master/deploy/nested/environment.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "deployToVnet": {
+            "value": "[parameters('deployToVnet')]"
+          },
+          "internalOnly": {
+            "value": "[parameters('internalOnly')]"
+          },
+          "environmentName": {
+            "value": "[parameters('environmentName')]"
+          },
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          },
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
+          },
+          "vnetAddressPrefix": {
+            "value": "[parameters('vnetAddressPrefix')]"
+          },
+          "controlPlaneSubnetName": {
+            "value": "[parameters('controlPlaneSubnetName')]"
+          },
+          "appsSubnetName": {
+            "value": "[parameters('appsSubnetName')]"
+          },
+          "controlPlaneSubnetAddressPrefix": {
+            "value": "[parameters('controlPlaneSubnetAddressPrefix')]"
+          },
+          "appsSubnetAddressPrefix": {
+            "value": "[parameters('appsSubnetAddressPrefix')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[equals(string(and(parameters('deployToVnet'), parameters('internalOnly'))), 'True')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "dnsZoneTemplate",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'environmentTemplate')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/gabesmsft/Container-Apps/ContainerAppInVNET/master/deploy/nested/dnsZone.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "defaultDomain": {
+            "value": "[reference('environmentTemplate').outputs.defaultDomain.value]"
+          },
+          "staticIp": {
+            "value": "[reference('environmentTemplate').outputs.staticIp.value]"
+          },
+          "vnetId": {
+            "value": "[reference('environmentTemplate').outputs.vnetId.value]"
+          },
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
+          }
+        }
+      }
+    }
+  ]
+}

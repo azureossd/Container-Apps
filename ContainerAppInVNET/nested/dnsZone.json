@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "defaultValue": "canadacentral",
+      "type": "String",
+      "metadata": {
+        "description": "The location into which the resources should be deployed."
+      }
+    },
+    "defaultDomain": {
+      "type": "String",
+      "metadata": {
+        "description": "The default domain of the Container App Environment. This is auto-generated during deployment of the Container App Environment."
+      }
+    },
+    "staticIp": {
+      "type": "String",
+      "metadata": {
+        "description": "The static private ip of the Container App Environment. This is auto-generated during deployment of the internal-only Container App Environment."
+      }
+    },
+    "vnetId": {
+      "type": "String",
+      "metadata": {
+        "description": "The resource id of the virtual network."
+      }
+    },
+    "vnetName": {
+      "type": "String",
+      "metadata": {
+        "description": "The name of the virtual network."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('defaultDomain')]",
+      "location": "global"
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', parameters('defaultDomain'), format('{0}-link', parameters('vnetName')))]",
+      "location": "global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[parameters('vnetId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', parameters('defaultDomain'), '*')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', parameters('defaultDomain'))]"
+      ],
+      "properties": {
+        "ttl": 3600,
+        "aRecords": [
+          {
+            "ipv4Address": "[parameters('staticIp')]"
+          }
+        ]
+      }
+    }
+  ]
+}
