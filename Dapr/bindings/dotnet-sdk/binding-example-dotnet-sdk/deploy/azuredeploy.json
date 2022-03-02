@@ -140,10 +140,9 @@
       }
     },
     {
-      "name": "bindingappnodejs",
+      "name": "bindingapp",
       "type": "Microsoft.Web/containerApps",
       "apiVersion": "2021-03-01",
-      "kind": "workerapp",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
@@ -207,7 +206,7 @@
           },
           "containers": [
             {
-              "name": "bindingappnodejs",
+              "name": "bindingappdotnetsdk",
               "image": "[parameters('containerimage1')]",
               "env": [
               ]

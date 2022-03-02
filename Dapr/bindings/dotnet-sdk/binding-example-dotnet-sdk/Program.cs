@@ -20,7 +20,8 @@ namespace binding_example_dotnet_sdk
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                     .UseUrls("http://*:5000"); ;
                 });
     }
 }
