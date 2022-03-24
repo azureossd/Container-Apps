@@ -122,7 +122,7 @@
     {
       "apiVersion": "2021-03-01",
       "name": "[parameters('environmentName')]",
-      "type": "Microsoft.Web/kubeEnvironments",
+      "type": "Microsoft.App/kubeEnvironments",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -141,17 +141,17 @@
     },
     {
       "name": "bindingappjs",
-      "type": "Microsoft.Web/containerApps",
+      "type": "Microsoft.App/containerApps",
       "apiVersion": "2021-03-01",
       "kind": "workerapp",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+        "[concat('Microsoft.App/kubeenvironments/', parameters('environmentName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts/queueServices/queues', parameters('storageAccountName'), 'default', parameters('storageQueueName'))]"
       ],
       "properties": {
-        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
         "configuration": {
           "ingress": {
             "external": true,
@@ -174,8 +174,8 @@
         },
         "template": {
           "scale": {
-            "minReplicas": "0",
-            "maxReplicas": "10",
+            "minReplicas": "1",
+            "maxReplicas": "25",
             "rules": [
               {
                 "name": "cpusscalingrule",
@@ -193,7 +193,7 @@
                   "type": "azure-servicebus",
                   "metadata": {
                     "queueName": "myServiceBusQueue",
-                    "messageCount": "1"
+                    "messageCount": "10"
                   },
                   "auth": [
                     {

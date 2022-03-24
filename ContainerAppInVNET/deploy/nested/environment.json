@@ -128,7 +128,7 @@
     {
       "apiVersion": "2021-03-01",
       "name": "[parameters('environmentName')]",
-      "type": "Microsoft.Web/kubeEnvironments",
+      "type": "Microsoft.App/kubeEnvironments",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]",
@@ -154,11 +154,11 @@
   "outputs": {
     "defaultDomain": {
       "type": "string",
-      "value": "[reference(concat('Microsoft.Web/kubeEnvironments/', parameters('environmentName')), '2021-03-01').defaultDomain]"
+      "value": "[reference(concat('Microsoft.App/kubeEnvironments/', parameters('environmentName')), '2021-03-01').defaultDomain]"
     },
     "staticIp": {
       "type": "string",
-      "value": "[reference(concat('Microsoft.Web/kubeEnvironments/', parameters('environmentName')), '2021-03-01').staticIp]"
+      "value": "[reference(concat('Microsoft.App/kubeEnvironments/', parameters('environmentName')), '2021-03-01').staticIp]"
     },
     "vnetId": {
       "type": "string",

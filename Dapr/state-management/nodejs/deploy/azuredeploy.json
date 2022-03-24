@@ -77,7 +77,7 @@
     {
       "apiVersion": "2021-03-01",
       "name": "[parameters('environmentName')]",
-      "type": "Microsoft.Web/kubeEnvironments",
+      "type": "Microsoft.App/kubeEnvironments",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -96,15 +96,15 @@
     },
     {
       "name": "statefulapp",
-      "type": "Microsoft.Web/containerApps",
+      "type": "Microsoft.App/containerApps",
       "apiVersion": "2021-03-01",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+        "[concat('Microsoft.App/kubeenvironments/', parameters('environmentName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', parameters('storageBlobContainerName'))]"
       ],
       "properties": {
-        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
         "configuration": {
           "ingress": {
             "external": true,
@@ -137,7 +137,7 @@
           ],
           "scale": {
             "minReplicas": 0,
-            "maxReplicas": 5,
+            "maxReplicas": 25,
             "rules": [
               {
                 "name": "httpscalingrule",

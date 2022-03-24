@@ -109,7 +109,7 @@
     {
       "apiVersion": "2021-03-01",
       "name": "[parameters('environmentName')]",
-      "type": "Microsoft.Web/kubeEnvironments",
+      "type": "Microsoft.App/kubeEnvironments",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -128,16 +128,16 @@
     },
     {
       "name": "publisher",
-      "type": "Microsoft.Web/containerApps",
+      "type": "Microsoft.App/containerApps",
       "apiVersion": "2021-03-01",
       "kind": "containerapp",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+        "[concat('Microsoft.App/kubeenvironments/', parameters('environmentName'))]",
 		"[resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules/', parameters('serviceBusNamespaceName'), parameters('serviceBusTopicName'), variables('policy'))]"
       ],
       "properties": {
-        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
         "configuration": {
           "ingress": {
             "external": true,
@@ -194,16 +194,16 @@
     },
     {
       "name": "consumer1",
-      "type": "Microsoft.Web/containerApps",
+      "type": "Microsoft.App/containerApps",
       "apiVersion": "2021-03-01",
       "kind": "containerapp",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/kubeenvironments/', parameters('environmentName'))]",
+        "[concat('Microsoft.App/kubeenvironments/', parameters('environmentName'))]",
 		"[resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules/', parameters('serviceBusNamespaceName'), parameters('serviceBusTopicName'), variables('policy'))]"
       ],
       "properties": {
-        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
         "configuration": {
           "secrets": [
 			{
@@ -256,15 +256,15 @@
     },
     {
       "name": "consumer2",
-      "type": "Microsoft.Web/containerApps",
+      "type": "Microsoft.App/containerApps",
       "apiVersion": "2021-03-01",
       "kind": "containerapp",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/containerApps/', 'consumer1')]"
+        "[concat('Microsoft.App/containerApps/', 'consumer1')]"
       ],
       "properties": {
-        "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environmentName'))]",
+        "kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
         "configuration": {
           "secrets": [
 			{
