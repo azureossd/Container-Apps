@@ -112,9 +112,9 @@
 		  }
 		},
 		{
-		  "apiVersion": "2021-03-01",
+		  "apiVersion": "2022-01-01-preview",
 		  "name": "[parameters('environmentName')]",
-		  "type": "Microsoft.App/kubeEnvironments",
+		  "type": "Microsoft.App/managedEnvironments",
 		  "location": "[parameters('location')]",
 		  "dependsOn": [
 			"[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -134,14 +134,14 @@
 		{
 			"name": "myactorservice",
 			"type": "Microsoft.App/containerApps",
-			"apiVersion": "2021-03-01",
+			"apiVersion": "2022-01-01-preview",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"[concat('Microsoft.App/kubeenvironments/', parameters('environmentName'))]",
+				"[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
 				"[parameters('redisCacheName')]"
 			],
 			"properties": {
-				"kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
+				"managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
 				"configuration": {
 					"ingress": {
 						"external": false,
@@ -166,8 +166,8 @@
 						}
 					],
 					"scale": {
-					  "minReplicas": 1,
-					  "maxReplicas": 5, 
+					  "minReplicas": "1",
+					  "maxReplicas": "10", 
 					  "rules": [
 						  {
 							"name": "httpscalingrule",
@@ -215,13 +215,13 @@
 		{
 			"name": "myactorclient",
 			"type": "Microsoft.App/containerApps",
-			"apiVersion": "2021-03-01",
+			"apiVersion": "2022-01-01-preview",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				"myactorservice"
 			],
 			"properties": {
-				"kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
+				"managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
 				"configuration": {
 					"ingress": {
 						"external": true,

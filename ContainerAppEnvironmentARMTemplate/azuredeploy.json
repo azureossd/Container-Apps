@@ -37,9 +37,9 @@
       }
     },
     {
-      "apiVersion": "2021-03-01",
+      "apiVersion": "2022-01-01-preview",
       "name": "[parameters('environmentName')]",
-      "type": "Microsoft.App/kubeEnvironments",
+      "type": "Microsoft.App/managedEnvironments",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -57,16 +57,16 @@
       }
     },
     {
-      "apiVersion": "2021-03-01",
+      "apiVersion": "2022-01-01-preview",
       "name": "[parameters('containerAppName1')]",
       "type": "Microsoft.App/containerapps",
       "kind": "containerapps",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.App/kubeenvironments/', parameters('environmentName'))]"
+        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]"
       ],
       "properties": {
-        "kubeEnvironmentId": "[resourceId('Microsoft.App/kubeEnvironments', parameters('environmentName'))]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
         "configuration": {
           "ingress": {
             "external": true,
