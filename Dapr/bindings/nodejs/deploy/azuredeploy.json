@@ -18,9 +18,25 @@
       "type": "string",
       "defaultValue": "canadacentral"
     },
-    "containerimage1": {
+    "bindingappCI": {
       "type": "String",
       "defaultValue": "docker.io/gfakedocker/bindingnodejs:latest"
+    },
+    "bindingapp": {
+      "type": "String",
+      "defaultValue": "bindingappnodejs"
+    },
+    "bindingappId": {
+      "type": "String",
+      "defaultValue": "bindingapp"
+    },
+    "inputbinding": {
+      "type": "String",
+      "defaultValue": "mybindingforinput"
+    },
+    "outputbinding": {
+      "type": "String",
+      "defaultValue": "mybindingforoutput"
     },
     "serviceBusNamespaceName": {
       "type": "string",
@@ -140,15 +156,98 @@
       }
     },
     {
-      "name": "bindingappjs",
+      "apiVersion": "2022-01-01-preview",
+      "type": "Microsoft.App/managedEnvironments/daprComponents",
+      "name": "[concat(parameters('environmentName'), '/', parameters('inputbinding'))]",
+      "dependsOn": [
+        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]"
+      ],
+      "properties": {
+        "componentType": "bindings.azure.servicebusqueues",
+        "version": "v1",
+        "ignoreErrors": false,
+        "initTimeout": "50s",
+        "secrets": [
+          {
+            "name": "sbconn1secret",
+            "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules',parameters('serviceBusNamespaceName'), variables('policy')),'2017-04-01').secondaryConnectionString]"
+          }
+        ],
+        "metadata": [
+          {
+            "name": "connectionString",
+            "secretRef": "sbconn1secret"
+          },
+          {
+            "name": "queueName",
+            "value": "[parameters('serviceBusQueueName')]"
+          },
+          {
+            "name": "ttlInSeconds",
+            "value": "60"
+          }
+        ],
+        "scopes": [
+          "[parameters('bindingappId')]"
+        ]
+      }
+    },
+    {
+      "apiVersion": "2022-01-01-preview",
+      "type": "Microsoft.App/managedEnvironments/daprComponents",
+      "name": "[concat(parameters('environmentName'), '/', parameters('outputbinding'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/queueServices/queues', parameters('storageAccountName'), 'default', parameters('storageQueueName'))]"
+      ],
+      "properties": {
+        "componentType": "bindings.azure.storagequeues",
+        "version": "v1",
+        "ignoreErrors": false,
+        "initTimeout": "50s",
+        "secrets": [
+          {
+            "name": "storagename1secret",
+            "value": "[parameters('storageAccountName')]"
+          },
+          {
+            "name": "storageconn1secret",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-06-01').keys[1].value]"
+          }
+        ],
+        "metadata": [
+          {
+            "name": "storageAccount",
+            "secretRef": "storagename1secret"
+          },
+          {
+            "name": "storageAccessKey",
+            "secretRef": "storageconn1secret"
+          },
+          {
+            "name": "queue",
+            "value": "[parameters('storageQueueName')]"
+          },
+          {
+            "name": "ttlInSeconds",
+            "value": "600"
+          }
+        ],
+        "scopes": [
+          "[parameters('bindingappId')]"
+        ]
+      }
+    },
+    {
+      "name": "[parameters('bindingapp')]",
       "type": "Microsoft.App/containerApps",
       "kind": "containerapps",
       "apiVersion": "2022-01-01-preview",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
-        "[resourceId('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts/queueServices/queues', parameters('storageAccountName'), 'default', parameters('storageQueueName'))]"
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('inputbinding'))]",
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('outputbinding'))]"
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
@@ -158,19 +257,16 @@
             "targetPort": "[variables('APP_PORT')]"
           },
           "secrets": [
-            {
-              "name": "sbconn1secret",
-              "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules',parameters('serviceBusNamespaceName'), variables('policy')),'2017-04-01').secondaryConnectionString]"
-            },
-            {
-              "name": "storagename1secret",
-              "value": "[parameters('storageAccountName')]"
-            },
-            {
-              "name": "storageconn1secret",
-              "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-06-01').keys[1].value]"
-            }
-          ]
+			  {
+				"name": "sbconn1secret",
+				"value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules',parameters('serviceBusNamespaceName'), variables('policy')),'2017-04-01').secondaryConnectionString]"
+			  }
+          ],
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "[parameters('bindingappId')]"
+          }
         },
         "template": {
           "scale": {
@@ -207,61 +303,12 @@
           },
           "containers": [
             {
-              "name": "bindingappnodejs",
-              "image": "[parameters('containerimage1')]",
+              "name": "[parameters('bindingapp')]",
+              "image": "[parameters('bindingappCI')]",
               "env": [
               ]
             }
-          ],
-          "dapr": {
-            "enabled": true,
-            "appPort": "[variables('APP_PORT')]",
-            "appId": "mybindingsapp",
-            "components": [
-              {
-                "name": "mybindingforinput",
-                "type": "bindings.azure.servicebusqueues",
-                "version": "v1",
-                "metadata": [
-                  {
-                    "name": "connectionString",
-                    "secretRef": "sbconn1secret"
-                  },
-                  {
-                    "name": "queueName",
-                    "value": "[parameters('serviceBusQueueName')]"
-                  },
-                  {
-                    "name": "ttlInSeconds",
-                    "value": "60"
-                  }
-                ]
-              },
-              {
-                "name": "mybindingforoutput",
-                "type": "bindings.azure.storagequeues",
-                "version": "v1",
-                "metadata": [
-                  {
-                    "name": "storageAccount",
-                    "secretRef": "storagename1secret"
-                  },
-                  {
-                    "name": "storageAccessKey",
-                    "secretRef": "storageconn1secret"
-                  },
-                  {
-                    "name": "queue",
-                    "value": "[parameters('storageQueueName')]"
-                  },
-                  {
-                    "name": "ttlInSeconds",
-                    "value": "600"
-                  }
-                ]
-              }
-            ]
-          }
+          ]
         }
       }
     }

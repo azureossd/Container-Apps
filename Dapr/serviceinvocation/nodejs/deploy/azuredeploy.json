@@ -1,171 +1,190 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-		"location": {
-		  "type": "string",
-		  "defaultValue": "canadacentral"
-		},
-		"environmentName": {
-		  "type": "string",
-		  "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
-		},
-		"workspaceName": {
-		  "type": "string",
-		  "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
-		},
-		"workspaceLocation": {
-		  "type": "string",
-		  "defaultValue": "canadacentral"
-		},
-		"containerimage1": {
-		  "type": "string",
-		  "defaultValue": "docker.io/gfakedocker/daprservicebackendnodejs:latest"
-		},
-		"containerimage2": {
-		  "type": "string",
-		  "defaultValue": "docker.io/gfakedocker/daprservicefrontendnodejs:latest"
-		}
-	},
-    "variables": {
-	  "APP_PORT": "5000"
-	},
-    "resources": [
-		{
-		  "apiVersion": "2020-08-01",
-		  "name": "[parameters('workspaceName')]",
-		  "type": "Microsoft.OperationalInsights/workspaces",
-		  "location": "[parameters('workspaceLocation')]",
-		  "properties": {
-			"sku": {
-			  "name": "PerGB2018"
-			},
-			"retentionInDays": 30
-		  }
-		},
-		{
-		  "apiVersion": "2022-01-01-preview",
-		  "name": "[parameters('environmentName')]",
-		  "type": "Microsoft.App/managedEnvironments",
-		  "location": "[parameters('location')]",
-		  "dependsOn": [
-			"[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-		  ],
-		  "properties": {
-			"type": "managed",
-			"internalLoadBalancerEnabled": false,
-			"appLogsConfiguration": {
-			  "destination": "log-analytics",
-			  "logAnalyticsConfiguration": {
-				"customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
-				"sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
-			  }
-			}
-		  }
-		},
-		{
-			"name": "httpbackendservice",
-			"type": "Microsoft.App/containerApps",
-			"apiVersion": "2022-01-01-preview",
-			"location": "[parameters('location')]",
-			"dependsOn": [
-				"[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]"
-			],
-			"properties": {
-				"managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
-				"configuration": {
-					"ingress": {
-						"external": false,
-						"targetPort": "[variables('APP_PORT')]"
-					},
-					"secrets": [
-					]
-				},
-				"template": {
-					"containers": [
-						{
-							"name": "httpbackendservice",
-							"image": "[parameters('containerimage1')]",
-							"env": [
-								{
-								  "name": "APP_PORT",
-								  "value": "[variables('APP_PORT')]"
-								}
-							]
-						}
-					],
-					"scale": {
-					  "minReplicas": "0",
-					  "maxReplicas": "10", 
-					  "rules": [
-						  {
-							"name": "httpscalingrule",
-							"http": {
-							  "metadata": {
-								"concurrentRequests": "100"
-							  }
-							}
-						  }
-					  ]
-					},
-					"dapr": {
-						"enabled": true,
-						"appPort": "[variables('APP_PORT')]",
-						"appId": "backendapp"
-					}
-				}
-			}
-		},
-		{
-			"name": "httpfrontendservice",
-			"type": "Microsoft.App/containerApps",
-			"apiVersion": "2022-01-01-preview",
-			"location": "[parameters('location')]",
-			"dependsOn": [
-				"httpbackendservice"
-			],
-			"properties": {
-				"managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
-				"configuration": {
-					"ingress": {
-						"external": true,
-						"targetPort": "[variables('APP_PORT')]"
-					}
-				},
-				"template": {
-					"containers": [
-						{
-							"name": "httpfrontendservice",
-							"image": "[parameters('containerimage2')]",
-							"env": [
-								{
-								  "name": "APP_PORT",
-								  "value": "[variables('APP_PORT')]"
-								}
-							]
-						}
-					],
-					"scale": {
-					  "minReplicas": "0",
-					  "maxReplicas": "10", 
-					  "rules": [
-						  {
-							"name": "httpscalingrule",
-							"http": {
-							  "metadata": {
-								"concurrentRequests": "100"
-							  }
-							}
-						  }
-					  ]
-					},
-					"dapr": {
-						"enabled": true,
-						"appPort": "[variables('APP_PORT')]",
-						"appId": "frontendapp"
-					}
-				}
-			}
-		}
-	]
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+    },
+    "workspaceName": {
+      "type": "string",
+      "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
+    },
+    "workspaceLocation": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "httpbackendserviceCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/daprservicebackendnodejs:latest"
+    },
+    "httpfrontendserviceCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/daprservicefrontendnodejs:latest"
+    },
+    "httpbackendservice": {
+      "type": "string",
+      "defaultValue": "httpbackendservice"
+    },
+    "httpfrontendservice": {
+      "type": "string",
+      "defaultValue": "httpfrontendservice"
+    },
+    "backendappId": {
+      "type": "string",
+      "defaultValue": "backendapp"
+    },
+    "frontendappId": {
+      "type": "string",
+      "defaultValue": "frontendapp"
+    }
+  },
+  "variables": {
+    "APP_PORT": "5000"
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-08-01",
+      "name": "[parameters('workspaceName')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "[parameters('workspaceLocation')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "apiVersion": "2022-01-01-preview",
+      "name": "[parameters('environmentName')]",
+      "type": "Microsoft.App/managedEnvironments",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+      ],
+      "properties": {
+        "internalLoadBalancerEnabled": false,
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
+            "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
+          }
+        },
+        "scopes": [
+          "[parameters('backendappId')]",
+          "[parameters('frontendappId')]"
+        ]
+      }
+    },
+    {
+      "name": "[parameters('httpbackendservice')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-01-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": false,
+            "targetPort": "[variables('APP_PORT')]"
+          },
+          "secrets": [
+          ],
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "[parameters('backendappId')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('httpbackendservice')]",
+              "image": "[parameters('httpbackendserviceCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "0",
+            "maxReplicas": "10",
+            "rules": [
+              {
+                "name": "httpscalingrule",
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "100"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "[parameters('httpfrontendservice')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-01-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[parameters('httpbackendservice')]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT')]"
+          },
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "[parameters('frontendappId')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('httpfrontendservice')]",
+              "image": "[parameters('httpfrontendserviceCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "0",
+            "maxReplicas": "10",
+            "rules": [
+              {
+                "name": "httpscalingrule",
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "10"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
 }

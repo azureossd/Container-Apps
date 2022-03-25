@@ -32,9 +32,21 @@
         "description": "Name of the Storage blob container"
       }
     },
-    "containerimage1": {
+    "statefulappCI": {
       "type": "string",
       "defaultValue": "docker.io/gfakedocker/statefulappnodejs:latest"
+    },
+    "statefulapp": {
+      "type": "string",
+      "defaultValue": "statefulappnodejs"
+    },
+    "statefulappId": {
+      "type": "string",
+      "defaultValue": "statefulapp"
+    },
+    "statestore": {
+      "type": "string",
+      "defaultValue": "mystatestore"
     }
   },
   "variables": {
@@ -95,13 +107,55 @@
       }
     },
     {
-      "name": "statefulapp",
+      "apiVersion": "2022-01-01-preview",
+      "type": "Microsoft.App/managedEnvironments/daprComponents",
+      "name": "[concat(parameters('environmentName'), '/', parameters('statestore'))]",
+      "dependsOn": [
+        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', parameters('storageBlobContainerName'))]"
+      ],
+      "properties": {
+        "componentType": "state.azure.blobstorage",
+        "version": "v1",
+        "ignoreErrors": false,
+        "initTimeout": "50s",
+        "secrets": [
+          {
+            "name": "storageaccountnamesecret",
+            "value": "[parameters('storageAccountName')]"
+          },
+          {
+            "name": "storageaccountkeysecret",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-06-01').keys[1].value]"
+
+          }
+        ],
+        "metadata": [
+          {
+            "name": "accountName",
+            "secretRef": "storageaccountnamesecret"
+          },
+          {
+            "name": "accountKey",
+            "secretRef": "storageaccountkeysecret"
+          },
+          {
+            "name": "containerName",
+            "value": "[parameters('storageBlobContainerName')]"
+          }
+        ],
+        "scopes": [
+          "[parameters('statefulappId')]"
+        ]
+      }
+    },
+    {
+      "name": "[parameters('statefulapp')]",
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2022-01-01-preview",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', parameters('storageBlobContainerName'))]"
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('statestore'))]"
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
@@ -110,23 +164,17 @@
             "external": true,
             "targetPort": "[variables('APP_PORT')]"
           },
-          "secrets": [
-            {
-              "name": "storageaccountnamesecret",
-              "value": "[parameters('storageAccountName')]"
-            },
-            {
-              "name": "storageaccountkeysecret",
-              "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-06-01').keys[1].value]"
-
-            }
-          ]
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT')]",
+            "appId": "[parameters('statefulappId')]"
+          }
         },
         "template": {
           "containers": [
             {
-              "name": "statefulapp",
-              "image": "[parameters('containerimage1')]",
+              "name": "[parameters('statefulapp')]",
+              "image": "[parameters('statefulappCI')]",
               "env": [
                 {
                   "name": "APP_PORT",
@@ -136,8 +184,8 @@
             }
           ],
           "scale": {
-            "minReplicas": 0,
-            "maxReplicas": 25,
+            "minReplicas": "0",
+            "maxReplicas": "10",
             "rules": [
               {
                 "name": "httpscalingrule",
@@ -148,32 +196,6 @@
                 }
               }
             ]
-          },
-          "dapr": {
-            "enabled": true,
-            "appPort": "[variables('APP_PORT')]",
-            "appId": "statefulapp",
-						"components": [
-							{
-							  "name": "mystatestore",
-							  "type": "state.azure.blobstorage",
-							  "version": "v1",
-							  "metadata": [
-                  {
-                    "name": "accountName",
-                    "secretRef": "storageaccountnamesecret"
-                  },
-                  {
-                    "name": "accountKey",
-                    "secretRef": "storageaccountkeysecret"
-                  },
-                  {
-                    "name": "containerName",
-                    "value": "[parameters('storageBlobContainerName')]"
-                  }
-							  ]
-							}
-						]
           }
         }
       }
