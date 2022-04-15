@@ -29,6 +29,9 @@ https://*ContainerAppName*.*FQDNSuffix*/writestatestore
 https://*ContainerAppName*.*FQDNSuffix*/readstatestore
 4. Verify that this is the same value that was rendered in step 2.
 
+
+THE FOLLOWING IS DEPRECATED AND WILL BE UPDATED IN THE NEAR FUTURE.
+
 You can also use the Azure CLI to deploy the Container App. A Container App-schema components yaml file named components.yaml is located under the **deploy** folder. Please note that for Container Apps, the yaml file does not use the Dapr schema. To create the Container App via the CLI, you will need an existing Container App Environment and Azure Storage account. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI. Refer to the [Azure Storage Account CLI documentation](https://docs.microsoft.com/cli/azure/storage/account?view=azure-cli-latest) for information about how to create the Storage account via CLI.  Here is a sample PowerShell comamnd to create the Container App via the CLI. Run the command from the directory that contains the **deploy** folder:
 
 ```

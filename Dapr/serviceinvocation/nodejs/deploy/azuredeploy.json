@@ -28,11 +28,11 @@
     },
     "httpbackendservice": {
       "type": "string",
-      "defaultValue": "httpbackendservice"
+      "defaultValue": "httpbackendservicenodejs"
     },
     "httpfrontendservice": {
       "type": "string",
-      "defaultValue": "httpfrontendservice"
+      "defaultValue": "httpfrontendservicenodejs"
     },
     "backendappId": {
       "type": "string",
@@ -75,11 +75,7 @@
             "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
             "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
           }
-        },
-        "scopes": [
-          "[parameters('backendappId')]",
-          "[parameters('frontendappId')]"
-        ]
+        }
       }
     },
     {

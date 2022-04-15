@@ -1,0 +1,220 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+    },
+    "workspaceName": {
+      "type": "string",
+      "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
+    },
+    "workspaceLocation": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "identityappCI": {
+      "type": "string",
+      "defaultValue": "gfakedocker/managedidentitydotnet:latest"
+    },
+    "identityapp": {
+      "type": "string",
+      "defaultValue": "[concat('identityca1-', uniqueString(resourceGroup().id))]"
+    },
+    "ASPNETCORE_ENVIRONMENT": {
+      "type": "string",
+      "allowedValues": [
+        "Production",
+        "Development"
+      ]
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "defaultValue": "[concat('containerappuseridentity-', uniqueString(resourceGroup().id))]"
+    },
+    "keyVaultName1": {
+      "type": "string",
+      "defaultValue": "[concat('keyvault1-', uniqueString(resourceGroup().id))]"
+    },
+    "keyVaultName2": {
+      "type": "string",
+      "defaultValue": "[concat('keyvault2-', uniqueString(resourceGroup().id))]"
+    }
+  },
+  "variables": {
+    "APP_PORT": "80"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2018-11-30",
+      "name": "[parameters('managedIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "apiVersion": "2020-08-01",
+      "name": "[parameters('workspaceName')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "[parameters('workspaceLocation')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2021-04-01-preview",
+      "name": "[parameters('keyVaultName1')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "enableSoftDelete": false,
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [],
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        },
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "AzureServices"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "name": "[concat(parameters('keyVaultName1'), '/', 'secret1')]",
+      "properties": {
+        "value": "I like bacon."
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName1'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2021-04-01-preview",
+      "name": "[parameters('keyVaultName2')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName1'), 'secret1')]"
+      ],
+      "properties": {
+        "enableSoftDelete": false,
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [],
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        },
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "AzureServices"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "name": "[concat(parameters('keyVaultName2'), '/', 'secret2')]",
+      "properties": {
+        "value": "biscuits and gravy"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))]"
+      ]
+    },
+    {
+      "apiVersion": "2022-01-01-preview",
+      "name": "[parameters('environmentName')]",
+      "type": "Microsoft.App/managedEnvironments",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+      ],
+      "properties": {
+        "internalLoadBalancerEnabled": false,
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
+            "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[parameters('identityapp')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-01-01-preview",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned,UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]": {}
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName2'), 'secret2')]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('identityapp')]",
+              "image": "[parameters('identityappCI')]",
+              "env": [
+                {
+                  "name": "ASPNETCORE_ENVIRONMENT",
+                  "value": "[parameters('ASPNETCORE_ENVIRONMENT')]"
+                },
+                {
+                  "name": "AZURE_KEYVAULT_RESOURCEENDPOINT1",
+                  "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName1'))).vaultUri]"
+                },
+                {
+                  "name": "AZURE_KEYVAULT_RESOURCEENDPOINT2",
+                  "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))).vaultUri]"
+                },
+                {
+                  "name": "CLIENTID",
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))).clientid]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "0",
+            "maxReplicas": "10",
+            "rules": [
+              {
+                "name": "httpscalingrule",
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "10"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

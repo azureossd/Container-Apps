@@ -22,6 +22,7 @@ The docker images are already built and publically accessible and configured as 
 To demonstrate that the frontend container is able to communicate with the backend container, make a request to the following URL (replacing *ContainerAppName*.*FQDNSuffix* with your Container App's domain):
 https://*ContainerAppName*.*FQDNSuffix*/frontendpoint
 
+THE FOLLOWING IS DEPRECATED AND WILL BE UPDATED SOON.
 ### CLI deployment for multi-container Container Apps
 [At the time of this writing](https://github.com/microsoft/azure-container-apps/wiki/Known-Issues-for-public-preview), the CLI assumes that you are working with a single container. For multiple containers, you must supply a yaml configuration and use the --yaml argument.
 

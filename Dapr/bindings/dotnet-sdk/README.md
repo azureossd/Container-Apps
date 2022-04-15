@@ -41,6 +41,7 @@ ContainerAppConsoleLogs_CL
 | order by TimeGenerated desc
 ```
 
+THE FOLLOWING IS DEPRECATED AND WILL BE UPDATED IN THE NEAR FUTURE.
 
 You can also use the Azure CLI to deploy the Container App. A Container App-schema components yaml file named components.yaml is located under the **deploy** folder. Please note that for Container Apps, the yaml file does not use the Dapr schema. To create the Container App via the CLI, you will need an existing Container App Environment and Azure Service Bus Queue and Storage Queue. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI. Here is a sample command that creates the Container App via the CLI, using PowerShell. Replace the bracketed values below (and remove the brackets) and then run the following command from the directory that contains the **deploy** folder:
 
