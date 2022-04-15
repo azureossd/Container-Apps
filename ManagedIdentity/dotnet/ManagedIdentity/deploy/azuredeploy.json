@@ -70,7 +70,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2021-11-01-preview",
       "name": "[parameters('keyVaultName1')]",
       "location": "[parameters('location')]",
       "properties": {
@@ -89,7 +89,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2021-11-01-preview",
       "name": "[concat(parameters('keyVaultName1'), '/', 'secret1')]",
       "properties": {
         "value": "I like bacon."
@@ -100,7 +100,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2021-11-01-preview",
       "name": "[parameters('keyVaultName2')]",
       "location": "[parameters('location')]",
       "dependsOn": [
@@ -123,10 +123,10 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2021-11-01-preview",
       "name": "[concat(parameters('keyVaultName2'), '/', 'secret2')]",
       "properties": {
-        "value": "biscuits and gravy"
+        "value": "Home fries."
       },
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))]"
@@ -214,6 +214,44 @@
             ]
           }
         }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[concat(parameters('keyVaultName1'), '/', 'add')]",
+      "dependsOn": [
+        "[concat('Microsoft.App/containerApps/', parameters('identityapp'))]"
+      ],
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "[reference(concat('Microsoft.App/containerApps/', parameters('identityapp')), '2022-01-01-preview','Full').identity.principalId]",
+            "permissions": {
+              "secrets": ["get"]
+            },
+            "tenantId": "[subscription().tenantId]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[concat(parameters('keyVaultName2'), '/', 'add')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))]"
+      ],
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))).principalId]",
+            "permissions": {
+              "secrets": ["get"]
+            },
+            "tenantId": "[subscription().tenantId]"
+          }
+        ]
       }
     }
   ]

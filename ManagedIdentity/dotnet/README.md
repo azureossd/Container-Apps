@@ -24,13 +24,11 @@ The code in the Container App is configured to read these environment variables.
 
 ### Key Vaults
 Two Key Vaults are deployed:
-- keyvault1-*uniquestring*: The Container App will connect to this Key Vault via System-Assigned Managed Identity
-- keyvault2-*uniquestring*: The Container App will connect to this Key Vault via User-Assigned Managed Identity
+- keyvault1-*uniquestring*: The Container App will connect to this Key Vault via System-Assigned Managed Identity. This Key Vault contains a secret, and will have a policy that grants Container App's System-Assigned Managed Identity permission to get secrets.
+- keyvault2-*uniquestring*: The Container App will connect to this Key Vault via User-Assigned Managed Identity. This Key Vault contains a secret, and will have a policy that grants the User-Assigned Managed Identity permission to get secrets.
 
 ### Instructions
 After the template is deployed, do the following:
-1. In the keyvault1-*uniquestring* Key Vault's access policies, [add an access policy](https://docs.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal) that grants **Secret permissions** for **Get** operations to the identityca1-*uniquestring* identity.
-2. In the keyvault2-*uniquestring* Key Vault's access policies, [add an access policy](https://docs.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal) that grants **Secret permissions** for **Get** operations to the containerappuseridentity-*uniquestring* identity.
-3. On the Container App, open the web url for the Container App.
-4. Click UserIdentityTest to test the User-Assigned Managed Identity connection. If successful, it should display the secret on the page.
-5. Click SystemIdentityTest to test the System-Assigned Managed Identity connection. If successful, it should display the secret on the page.
+1. On the Container App, open the web url for the Container App.
+2. Click UserIdentityTest to test the User-Assigned Managed Identity connection. If successful, it should display the secret on the page.
+3. Click SystemIdentityTest to test the System-Assigned Managed Identity connection. If successful, it should display the secret on the page.
