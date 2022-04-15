@@ -1,4 +1,4 @@
-# Dapr service-to-service with Container Apps
+# System- and User-Assigned Managed Identity with Container Apps
 This sample Azure Resource Manager template deploys a Container App Environment and Container App that gets secrets from KeyVaults via System-Assigned Managed Identity and User-Assigned Managed Identity.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FManagedIdentity%2Fdotnet%2FManagedIdentity%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FManagedIdentity%2Fdotnet%2FManagedIdentity%2Fdeploy%2Fazuredeploy.json)
