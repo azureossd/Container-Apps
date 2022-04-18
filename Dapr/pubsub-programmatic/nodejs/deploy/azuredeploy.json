@@ -244,6 +244,12 @@
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
         "configuration": {
+          "secrets": [
+            {
+              "name": "sbconn1secret",
+              "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceName'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
+            }
+          ],
           "dapr": {
             "enabled": true,
             "appPort": "[variables('APP_PORT')]",
@@ -270,7 +276,29 @@
                 }
               ]
             }
-          ]
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "10",
+            "rules": [
+              {
+                "name": "sbtopicscalingrule",
+                "custom": {
+                  "type": "azure-servicebus",
+                  "metadata": {
+                    "topicName": "[parameters('serviceBusTopicName')]",
+                    "messageCount": "5"
+                  },
+                  "auth": [
+                    {
+                      "secretRef": "sbconn1secret",
+                      "triggerParameter": "connection"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
         }
       }
     },
@@ -286,6 +314,12 @@
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
         "configuration": {
+          "secrets": [
+            {
+              "name": "sbconn1secret",
+              "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules',parameters('serviceBusNamespaceName'),parameters('serviceBusTopicName'),variables('policy')),'2017-04-01').secondaryConnectionString]"
+            }
+          ],
           "dapr": {
             "enabled": true,
             "appPort": "[variables('APP_PORT')]",
@@ -312,7 +346,29 @@
                 }
               ]
             }
-          ]
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "10",
+            "rules": [
+              {
+                "name": "sbtopicscalingrule",
+                "custom": {
+                  "type": "azure-servicebus",
+                  "metadata": {
+                    "topicName": "[parameters('serviceBusTopicName')]",
+                    "messageCount": "5"
+                  },
+                  "auth": [
+                    {
+                      "secretRef": "sbconn1secret",
+                      "triggerParameter": "connection"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
         }
       }
     }
