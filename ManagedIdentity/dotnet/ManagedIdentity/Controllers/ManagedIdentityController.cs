@@ -17,7 +17,7 @@ namespace ASPNETMSI.Controllers
 
         public async Task<IActionResult> System()
         {
-            string AZURE_KEYVAULT_RESOURCEENDPOINT = _config["AZURE_KEYVAULT_RESOURCEENDPOINT1"];
+            string AZURE_KEYVAULT_RESOURCEENDPOINT = _config["AZURE_KEYVAULT_RESOURCEENDPOINT"];
 
             var credential = new ManagedIdentityCredential();
 
@@ -38,7 +38,7 @@ namespace ASPNETMSI.Controllers
 
         public async Task<IActionResult> User()
         {
-            string AZURE_KEYVAULT_RESOURCEENDPOINT = _config["AZURE_KEYVAULT_RESOURCEENDPOINT2"];
+            string AZURE_KEYVAULT_RESOURCEENDPOINT = _config["AZURE_KEYVAULT_RESOURCEENDPOINT"];
             string CLIENTID = _config["CLIENTID"];
 
             var credential = new ManagedIdentityCredential(CLIENTID);
