@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 app.use(express.json({ type: 'application/*+json' }));
 
-const port = process.env.APP_PORT || 3000
+const port = process.env.APP_PORT || 4000
 
 const topic = process.env.SB_TOPIC || "mytopic1";
 
