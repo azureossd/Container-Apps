@@ -13,11 +13,11 @@ const topic = process.env.SB_TOPIC || "mytopic1";
 const pubsub_name = process.env.PUBSUB_NAME|| "mypubsub1";
 
 app.post('/publish', (req, res) => {
-  console.log("Publishing: ", req.body);
   const publishUrl = `${daprUrl}/publish/${pubsub_name}/${topic}`;
-  request( { uri: publishUrl, method: 'POST', json: req.body } );
-  
-  console.log("Publishing: ", publishUrl);
+
+  request( { uri: publishUrl, method: 'POST', json: req.body } );  
+
+  console.log("Publishing: ", req.body, " via ", publishUrl);
   
   res.sendStatus(200);
 });

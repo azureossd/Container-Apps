@@ -1,5 +1,4 @@
 # Dapr pub/sub with Container Apps
-THE FOLLOWING IS DEPRECATED AND WILL BE UPDATED SOON.
 
 This sample Azure Resource Manager template deploys a Container App Environment and three Container Apps which interact with a pub/sub component.
 
@@ -37,7 +36,7 @@ Body: {"mymessage1": "hello data"}
 For example:
 
 ```
-curl -H "Content-Type: application/json" -X POST https://publisher.agreeablemeadow-3efe39b9.canadacentral.azurecontainerapps.io/publish -d "{\"mymessage1\": \"hello data\"}"
+curl -H "Content-Type: application/json" -X POST https://publisher.<REPLACEWITHDEFAULTDOMAIN>.<REPLACEWITHREGION>.azurecontainerapps.io/publish -d "{\"mymessage1\": \"hello data\"}" 
 ```
 
 2. Check the Log Analytics workspace to verify that the Consumer Container Apps received the message. For example:
@@ -45,7 +44,7 @@ curl -H "Content-Type: application/json" -X POST https://publisher.agreeablemead
 ```
 let mymessage = "hello data";
 ContainerAppConsoleLogs_CL
-| where ContainerAppName_s == "consumer1" or ContainerAppName_s == "consumer2"
+| where ContainerAppName_s startswith "publisher" or ContainerAppName_s startswith "consumer1" or ContainerAppName_s startswith "consumer2"
 | where Log_s contains mymessage
 | project TimeGenerated, RevisionName_s, ContainerAppName_s, Log_s
 ```
