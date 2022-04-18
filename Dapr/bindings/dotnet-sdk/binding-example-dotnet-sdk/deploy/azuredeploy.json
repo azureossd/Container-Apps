@@ -288,8 +288,8 @@
                 "custom": {
                   "type": "azure-servicebus",
                   "metadata": {
-                    "queueName": "myServiceBusQueue",
-                    "messageCount": "10"
+                    "queueName": "[parameters('serviceBusQueueName')]",
+                    "messageCount": "5"
                   },
                   "auth": [
                     {
