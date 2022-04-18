@@ -31,7 +31,8 @@
       "allowedValues": [
         "Production",
         "Development"
-      ]
+      ],
+      "defaultValue": "Production"
     },
     "managedIdentityName": {
       "type": "string",
@@ -40,10 +41,6 @@
     "keyVaultName1": {
       "type": "string",
       "defaultValue": "[concat('keyvault1-', uniqueString(resourceGroup().id))]"
-    },
-    "keyVaultName2": {
-      "type": "string",
-      "defaultValue": "[concat('keyvault2-', uniqueString(resourceGroup().id))]"
     }
   },
   "variables": {
@@ -99,37 +96,14 @@
       ]
     },
     {
-      "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2021-11-01-preview",
-      "name": "[parameters('keyVaultName2')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName1'), 'secret1')]"
-      ],
-      "properties": {
-        "enableSoftDelete": false,
-        "tenantId": "[subscription().tenantId]",
-        "accessPolicies": [],
-        "sku": {
-          "name": "Standard",
-          "family": "A"
-        },
-        "networkAcls": {
-          "defaultAction": "Allow",
-          "bypass": "AzureServices"
-        }
-      }
-    },
-    {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2021-11-01-preview",
-      "name": "[concat(parameters('keyVaultName2'), '/', 'secret2')]",
+      "name": "[concat(parameters('keyVaultName1'), '/', 'secret2')]",
       "properties": {
-        "value": "Home fries."
+        "value": "Maple donuts."
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))]"
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName1'), 'secret1')]"
       ]
     },
     {
@@ -164,7 +138,7 @@
       },
       "dependsOn": [
         "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName2'), 'secret2')]"
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName1'), 'secret2')]"
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
@@ -185,12 +159,8 @@
                   "value": "[parameters('ASPNETCORE_ENVIRONMENT')]"
                 },
                 {
-                  "name": "AZURE_KEYVAULT_RESOURCEENDPOINT1",
+                  "name": "AZURE_KEYVAULT_RESOURCEENDPOINT",
                   "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName1'))).vaultUri]"
-                },
-                {
-                  "name": "AZURE_KEYVAULT_RESOURCEENDPOINT2",
-                  "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))).vaultUri]"
                 },
                 {
                   "name": "CLIENTID",
@@ -228,26 +198,14 @@
           {
             "objectId": "[reference(concat('Microsoft.App/containerApps/', parameters('identityapp')), '2022-01-01-preview','Full').identity.principalId]",
             "permissions": {
-              "secrets": ["get"]
+              "secrets": [ "get" ]
             },
             "tenantId": "[subscription().tenantId]"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/accessPolicies",
-      "apiVersion": "2021-11-01-preview",
-      "name": "[concat(parameters('keyVaultName2'), '/', 'add')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName2'))]"
-      ],
-      "properties": {
-        "accessPolicies": [
+          },
           {
             "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))).principalId]",
             "permissions": {
-              "secrets": ["get"]
+              "secrets": [ "get" ]
             },
             "tenantId": "[subscription().tenantId]"
           }
