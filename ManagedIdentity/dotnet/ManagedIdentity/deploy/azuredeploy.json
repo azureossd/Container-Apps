@@ -138,6 +138,7 @@
       },
       "dependsOn": [
         "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+		 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]",
         "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName1'), 'secret2')]"
       ],
       "properties": {
