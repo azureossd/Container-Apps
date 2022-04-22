@@ -53,7 +53,7 @@ resource nginx 'Microsoft.App/containerApps@2022-01-01-preview' = {
     template: {
       containers: [
         {
-          image: 'nginx:1.21.6'
+          image: 'nginx:latest'
           name: 'nginx'
           resources: {
             cpu: '0.5'
