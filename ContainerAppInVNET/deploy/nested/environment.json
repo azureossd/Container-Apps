@@ -144,8 +144,8 @@
           }
         },
         "containerAppsConfiguration": {
-          "controlPlaneSubnetResourceId": "[if(parameters('deployToVnet'), variables('controlPlaneSubnetResourceId'), '')]",
-          "appSubnetResourceId": "[if(parameters('deployToVnet'), variables('appSubnetResourceId'), '')]",
+          "infrastructureSubnetId": "[if(parameters('deployToVnet'), variables('controlPlaneSubnetResourceId'), '')]",
+          "runtimeSubnetId": "[if(parameters('deployToVnet'), variables('appSubnetResourceId'), '')]",
           "internalOnly": "[and(parameters('deployToVnet'), parameters('internalOnly'))]"
         }
       }
