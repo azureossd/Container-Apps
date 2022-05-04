@@ -16,11 +16,11 @@
         "description": "If you set the deployToVnet parameter to true, a virtual network will be deployed and the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
       }
     },
-    "internalOnly": {
+    "internal": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "If you set the deployToVnet and internalOnly parameters to true, the Container App Environment will only be reachable privately through the virtual network."
+        "description": "If you set the deployToVnet and internal parameters to true, the Container App Environment will only be reachable privately through the virtual network."
       }
     },
     "environmentName": {
@@ -143,10 +143,10 @@
             "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
           }
         },
-        "containerAppsConfiguration": {
-          "controlPlaneSubnetResourceId": "[if(parameters('deployToVnet'), variables('controlPlaneSubnetResourceId'), '')]",
-          "appSubnetResourceId": "[if(parameters('deployToVnet'), variables('appSubnetResourceId'), '')]",
-          "internalOnly": "[and(parameters('deployToVnet'), parameters('internalOnly'))]"
+        "vnetConfiguration": {
+          "infrastructureSubnetId": "[if(parameters('deployToVnet'), variables('controlPlaneSubnetResourceId'), '')]",
+          "runtimeSubnetId": "[if(parameters('deployToVnet'), variables('appSubnetResourceId'), '')]",
+          "internal": "[and(parameters('deployToVnet'), parameters('internal'))]"
         }
       }
     }
