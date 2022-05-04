@@ -86,8 +86,6 @@ resource pythonmanagedidentitykv 'Microsoft.App/containerApps@2022-01-01-preview
             cpu: '0.5'
             memory: '1.0Gi'
           }
-          // This appId is used to call the order-processor app in service invokation
-          // We set the actual appId for Dapr apps in the dapr {} object
           env: [
             {
               name: 'KEY_VAULT_NAME'
