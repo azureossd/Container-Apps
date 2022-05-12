@@ -1,0 +1,10 @@
+RESOURCE_GROUP="my-rg"
+CONTAINERAPPS_ENVIRONMENT="containerappsenv"
+LOCATION="eastus"
+AZURE_CONTAINER_REGISTRY="mycontainerregistry.azurecr.io"
+AZURE_CONTAINER_REGISTRY_USERNAME="myRegistryUsername"
+AZURE_CONTAINER_REGISTRY_PASSWORD="password"
+KEY_VAULT_NAME="my-keyvault"
+SECRET_NAME="yoursecret"
+USER_ASSIGNED_IDENTITY_NAME="pythoncontainerapps"
+
