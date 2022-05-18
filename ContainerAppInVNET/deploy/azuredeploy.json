@@ -58,32 +58,18 @@
         "description": "The IP address space used for the virtual network."
       }
     },
-    "controlPlaneSubnetName": {
+    "infrastructureSubnetName": {
       "type": "string",
-      "defaultValue": "control-plane",
+      "defaultValue": "infrastructure",
       "metadata": {
-        "description": "Subnet name for control plane infrastructure components and user app containers."
+        "description": "Subnet name for infrastructure components and user app containers."
       }
     },
-    "appsSubnetName": {
+    "infrastructureSubnetAddressPrefix": {
       "type": "string",
-      "defaultValue": "applications",
+      "defaultValue": "10.0.0.0/23",
       "metadata": {
-        "description": "Subnet name for  user app containers. Subnet that contains IP ranges mapped to applications deployed as containers."
-      }
-    },
-    "controlPlaneSubnetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/21",
-      "metadata": {
-        "description": "Subnet CIDR range for control plane infrastructure components and user app containers."
-      }
-    },
-    "appsSubnetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.8.0/21",
-      "metadata": {
-        "description": "Subnet CIDR range for user app containers. Subnet that contains IP ranges mapped to applications deployed as containers."
+        "description": "Subnet CIDR range for infrastructure components and user app containers."
       }
     }
   },
@@ -120,17 +106,11 @@
           "vnetAddressPrefix": {
             "value": "[parameters('vnetAddressPrefix')]"
           },
-          "controlPlaneSubnetName": {
-            "value": "[parameters('controlPlaneSubnetName')]"
+          "infrastructureSubnetName": {
+            "value": "[parameters('infrastructureSubnetName')]"
           },
-          "appsSubnetName": {
-            "value": "[parameters('appsSubnetName')]"
-          },
-          "controlPlaneSubnetAddressPrefix": {
-            "value": "[parameters('controlPlaneSubnetAddressPrefix')]"
-          },
-          "appsSubnetAddressPrefix": {
-            "value": "[parameters('appsSubnetAddressPrefix')]"
+          "infrastructureSubnetAddressPrefix": {
+            "value": "[parameters('infrastructureSubnetAddressPrefix')]"
           }
         }
       }
