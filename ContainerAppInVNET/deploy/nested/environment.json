@@ -51,11 +51,11 @@
         "description": "The IP address space used for the virtual network."
       }
     },
-    "controlPlaneSubnetName": {
+    "infrastructureSubnetName": {
       "type": "string",
-      "defaultValue": "control-plane",
+      "defaultValue": "infrastructure",
       "metadata": {
-        "description": "Subnet name for control plane infrastructure components and user app containers."
+        "description": "Subnet name for infrastructure components and user app containers."
       }
     },
     "appsSubnetName": {
@@ -65,24 +65,16 @@
         "description": "Subnet name for  user app containers. Subnet that contains IP ranges mapped to applications deployed as containers."
       }
     },
-    "controlPlaneSubnetAddressPrefix": {
+    "infrastructureSubnetAddressPrefix": {
       "type": "string",
-      "defaultValue": "10.0.0.0/21",
+      "defaultValue": "10.0.0.0/23",
       "metadata": {
-        "description": "Subnet CIDR range for control plane infrastructure components and user app containers."
-      }
-    },
-    "appsSubnetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.8.0/21",
-      "metadata": {
-        "description": "Subnet CIDR range for user app containers. Subnet that contains IP ranges mapped to applications deployed as containers."
+        "description": "Subnet CIDR range for infrastructure components and user app containers."
       }
     }
   },
   "variables": {
-    "controlPlaneSubnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('controlPlaneSubnetName'))]",
-    "appSubnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('appsSubnetName'))]"
+    "infrastructureSubnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('infrastructureSubnetName'))]"
   },
   "resources": [
     {
@@ -99,15 +91,9 @@
         },
         "subnets": [
           {
-            "name": "[parameters('controlPlaneSubnetName')]",
+            "name": "[parameters('infrastructureSubnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('controlPlaneSubnetAddressPrefix')]"
-            }
-          },
-          {
-            "name": "[parameters('appsSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('appsSubnetAddressPrefix')]"
+              "addressPrefix": "[parameters('infrastructureSubnetAddressPrefix')]"
             }
           }
         ]
@@ -144,8 +130,7 @@
           }
         },
         "vnetConfiguration": {
-          "infrastructureSubnetId": "[if(parameters('deployToVnet'), variables('controlPlaneSubnetResourceId'), '')]",
-          "runtimeSubnetId": "[if(parameters('deployToVnet'), variables('appSubnetResourceId'), '')]",
+          "infrastructureSubnetId": "[if(parameters('deployToVnet'), variables('infrastructureSubnetResourceId'), '')]",
           "internal": "[and(parameters('deployToVnet'), parameters('internal'))]"
         }
       }

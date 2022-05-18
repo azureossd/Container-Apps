@@ -12,7 +12,7 @@ A log Analytics workspace is deployed, which is required for the Container App E
 The Container App Environment houses Container Apps. This template gives you the option to deploy the environment in one of the following ways:
 - If you set the **deployToVnet** parameter to **true**, the Container App Environment will be deployed to a virtual network.
 - If you set the **deployToVnet** parameter to **false**, the Container App Environment will be deployed without a virtual network.
-- If you set the **deployToVnet** and **internalOnly** parameters to **true**, the Container App Environment will only be reachable privately through the virtual network.
+- If you set the **deployToVnet** and **internal** parameters to **true**, the Container App Environment will only be reachable privately through the virtual network.
 
 If you set the **deployToVnet** parameter to **true**, there are three properties that are available to add to the containerAppsConfiguration element of the Container App Environment resource but that are not included in this template:
 - platformReservedCidr
@@ -28,4 +28,4 @@ If you set the **deployToVnet** parameter to **true**, the virtual network will 
 - Control plane subnet: Subnet for control plane infrastructure components and user app container.
 
 ### Private DNS Zone
-If you set the **deployToVnet**, **internalOnly**, and **privateDNS** parameters to **true**, a private DNS zone will be deployed for the Container App Environment.
+If you set the **deployToVnet**, **internal**, and **privateDNS** parameters to **true**, a private DNS zone will be deployed for the Container App Environment.
