@@ -1,0 +1,165 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment_name": {
+            "type": "string"
+        },
+        "location": {
+            "defaultValue": "eastus",
+            "type": "string"
+        },
+        "azureContainerRegistry": {
+            "type": "string"
+        },
+        "azureContainerRegistryUsername": {
+            "type": "string"
+        },
+        "azureContainerRegistryPassword": {
+            "type": "string"
+        },
+        "azureStorageAccountName": {
+            "type": "string"
+        },
+        "azureStorageAccountKey": {
+            "type": "string"
+        },
+        "azureFileShareName": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "logAnalyticsWorkspaceName": "[concat('logs-', parameters('environment_name'))]",
+        "appInsightsName": "[concat('appins-', parameters('environment_name'))]",
+        // azureContainerRegistry is in the format of myregistry.acr.io
+        "nodeAzureFilesContainerAppsImage": "[concat(parameters('azureContainerRegistry'), '/', 'nodeazurefilescontainerapps:latest')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2020-03-01-preview",
+            "name": "[variables('logAnalyticsWorkspaceName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "retentionInDays": 30,
+                "features": {
+                    "searchVersion": 1
+                },
+                "sku": {
+                    "name": "PerGB2018"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02",
+            "name": "[variables('appInsightsName')]",
+            "location": "[parameters('location')]",
+            "kind": "web",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]"
+            ],
+            "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]"
+            }
+        },
+        {
+            "type": "Microsoft.App/managedEnvironments",
+            "apiVersion": "2022-03-01",
+            "name": "[parameters('environment_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Insights/components/', variables('appInsightsName'))]"
+            ],
+            "properties": {
+                "daprAIInstrumentationKey": "[reference(resourceId('Microsoft.Insights/components/', variables('appInsightsName')), '2020-02-02').InstrumentationKey]",
+                "appLogsConfiguration": {
+                    "destination": "log-analytics",
+                    "logAnalyticsConfiguration": {
+                        "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName')), '2020-03-01-preview').customerId]",
+                        "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName')), '2020-03-01-preview').primarySharedKey]"
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "type": "storages",
+                    "name": "azurefileshare",
+                    "apiVersion": "2022-03-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]"
+                    ],
+                    "properties": {
+                        "azureFile": {
+                            "accountName": "[parameters('azureStorageAccountName')]",
+                            "accountKey": "[parameters('azureStorageAccountKey')]",
+                            "shareName": "[parameters('azureFileShareName')]",
+                            "accessMode": "ReadWrite"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.App/containerApps",
+            "apiVersion": "2022-03-01",
+            "name": "nodeazurefilescontainerapps",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]"
+            ],
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]",
+                "configuration": {
+                    "secrets": [
+                        {
+                            "name": "azurecontainerregistrypasswordref",
+                            "value": "[parameters('azureContainerRegistryPassword')]"
+                        }
+                    ],
+                    "ingress": {
+                        "external": true,
+                        "targetPort": 3000
+                    },
+                    "registries": [
+                        {
+                            "server": "[parameters('azureContainerRegistry')]",
+                            "username": "[parameters('azureContainerRegistryUsername')]",
+                            "passwordSecretRef": "azurecontainerregistrypasswordref"
+                        }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "[variables('nodeAzureFilesContainerAppsImage')]",
+                            "name": "nodeazurefilescontainerapps",
+                            "resources": {
+                                "cpu": 0.5,
+                                "memory": "1.0Gi"
+                            },
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/azurefiles",
+                                    "volumeName": "azurefilemount"
+                                }
+                            ]
+                        }
+                    ],
+                    "scale": {
+                        "minReplicas": 1,
+                        "maxReplicas": 1
+                    },
+                    "volumes": [
+                        {
+                            "name": "azurefilemount",
+                            "storageType": "AzureFile",
+                            "storageName": "azurefileshare"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
