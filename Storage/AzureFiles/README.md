@@ -16,4 +16,4 @@ The Container App Environment houses the Container Apps. The Container App Envir
 
 ### Container App
 
-The Container App example comes with source code to build the Node application's `Dockerfile` in these examples for a complete example. The application in these examples has an endpoint to read off a file named `test.txt` in the configured Azure Files fileshare.
+The Container App example comes with source code to build the Node application's `Dockerfile` in these examples for a complete example. The application in these examples has an endpoint to read off a file named `test.txt` in the configured Azure Files fileshare. This file will first need to exist in the file share configured.
