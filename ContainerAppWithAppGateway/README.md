@@ -1,12 +1,11 @@
 # Container App with Application Gateway
 This sample Azure Resource Manager template deploys an Azure Container App behind an Azure Application Gateway. 
 
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppWithAppGateway%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppWithAppGateway%2Fdeploy%2Fazuredeploy.json)
+
 ## Prerequisites
 Deploy a Container App Environment and Virtual Network.
 You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppInVNET/deploy) to deploy a Virtual Network and [Internal Container App Environment](https://learn.microsoft.com/azure/container-apps/networking) that uses private DNS.
-
-
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppWithAppGateway%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppWithAppGateway%2Fdeploy%2Fazuredeploy.json)
 
 ## Resources deployed in this template
 ### Container App
