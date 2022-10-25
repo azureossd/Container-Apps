@@ -11,7 +11,7 @@
       "type": "String"
     },
     "location": {
-      "defaultValue": "centralus",
+      "defaultValue": "canadacentral",
       "type": "String"
     },
     "applicationGateways_appgateway_name": {
