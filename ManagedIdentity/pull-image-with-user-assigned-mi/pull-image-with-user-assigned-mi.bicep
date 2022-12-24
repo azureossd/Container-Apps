@@ -72,7 +72,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
       '${identity.id}': {}
     }
   }
-  properties:{
+  properties: {
     managedEnvironmentId: appEnvironment.id
     configuration: {
       ingress: {
