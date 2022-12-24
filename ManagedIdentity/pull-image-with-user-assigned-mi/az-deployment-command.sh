@@ -2,7 +2,7 @@
 
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \
-  --template-file ./pull-image-with-msi.bicep \
+  --template-file ./pull-image-with-user-assigned-mi.bicep \
   --parameters \
     environmentName="$CONTAINERAPPS_ENVIRONMENT" \
     containerAppName="$CONTAINERAPPS_NAME" \

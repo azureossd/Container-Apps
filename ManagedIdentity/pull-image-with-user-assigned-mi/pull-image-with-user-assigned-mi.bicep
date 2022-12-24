@@ -9,10 +9,6 @@ param acrPullDefinitionId string
 param userAssignedIdentityName string
 param location string = resourceGroup().location
 
-resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
-  name: azureContainerRegistry
-}
-
 resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: userAssignedIdentityName
   location: location 
@@ -20,8 +16,7 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-p
 
 // roleDefinitionId is the ID found here for AcrPull: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#acrpull
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: acr
-  name: guid(resourceGroup().name, azureContainerRegistry, 'AcrPull')
+  name: guid(resourceGroup().id, azureContainerRegistry, 'AcrPullTest')
   properties: {
     principalId: identity.properties.principalId  
     principalType: 'ServicePrincipal'
