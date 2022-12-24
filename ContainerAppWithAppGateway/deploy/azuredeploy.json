@@ -1,0 +1,269 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "defaultValue": "[format('vnet-{0}', uniqueString(resourceGroup().id))]",
+      "type": "String"
+    },
+    "publicIPAddresses_appgatewayip_name": {
+      "defaultValue": "appgatewaypublicip",
+      "type": "String"
+    },
+    "location": {
+      "defaultValue": "canadacentral",
+      "type": "String"
+    },
+    "applicationGateways_appgateway_name": {
+      "defaultValue": "appgateway",
+      "type": "String"
+    },
+    "containerappname": {
+      "defaultValue": "testapp",
+      "type": "String"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the Container App Environment."
+      }
+    }
+  },
+  "variables": {
+    "appgwsubnetNSG": "appgwsubnetNSG",
+    "appgwsubnetNSGId": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('appgwsubnetNSG'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-11-01",
+      "name": "[parameters('publicIPAddresses_appgatewayip_name')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4,
+        "ipTags": []
+      }
+    },
+    {
+      "type": "Microsoft.App/containerapps",
+      "apiVersion": "2022-01-01-preview",
+      "name": "[parameters('containerappname')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "None"
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "ingress": {
+            "external": true,
+            "targetPort": 80,
+            "transport": "Auto",
+            "traffic": [
+              {
+                "weight": 100,
+                "latestRevision": true
+              }
+            ],
+            "allowInsecure": true
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+              "name": "container1"
+
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2020-07-01",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('appgwsubnetNSG')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowGatewayManagerInBound",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "GatewayManager",
+              "destinationPortRange": "65200-65535",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "AllowLoadBalancerInBound",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "AzureLoadBalancer",
+              "destinationPortRange": "443",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2020-11-01",
+      "name": "[concat(parameters('vnetName'), '/appgwsubnet')]",
+      "dependsOn": [
+        "[variables('appgwsubnetNSGId')]"
+      ],
+      "properties": {
+        "addressPrefix": "10.0.3.0/24",
+        "serviceEndpoints": [],
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "networkSecurityGroup": {
+          "id": "[variables('appgwsubnetNSGId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/applicationGateways",
+      "apiVersion": "2020-11-01",
+      "name": "[parameters('applicationGateways_appgateway_name')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'appgwsubnet')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_appgatewayip_name'))]",
+        "[resourceId('Microsoft.App/containerapps', parameters('containerappname'))]"
+      ],
+      "properties": {
+        "sku": {
+          "name": "Standard_v2",
+          "tier": "Standard_v2"
+        },
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'appgwsubnet')]"
+              }
+            }
+          }
+        ],
+        "sslCertificates": [],
+        "trustedRootCertificates": [],
+        "trustedClientCertificates": [],
+        "sslProfiles": [],
+        "frontendIPConfigurations": [
+          {
+            "name": "appGwPublicFrontendIp",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_appgatewayip_name'))]"
+              }
+            }
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "port_80",
+            "properties": {
+              "port": 80
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "capp",
+            "properties": {
+              "backendAddresses": [
+                {
+                  "fqdn": "[reference(resourceId('Microsoft.App/containerapps',parameters('containerappname')),'2022-03-01', 'Full').properties.configuration.ingress.fqdn]"
+                }
+              ]
+            }
+          }
+        ],
+        "backendHttpSettingsCollection": [
+          {
+            "name": "https",
+            "type": "Microsoft.Network/applicationGateways/backendHttpSettingsCollection",
+            "properties": {
+              "port": 443,
+              "protocol": "Https",
+              "cookieBasedAffinity": "Disabled",
+              "hostName": "[reference(resourceId('Microsoft.App/containerapps',parameters('containerappname')),'2022-03-01', 'Full').properties.configuration.ingress.fqdn]",
+              "pickHostNameFromBackendAddress": false,
+              "requestTimeout": 20
+            }
+          }
+        ],
+        "httpListeners": [
+          {
+            "name": "new",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appgateway_name')), '/frontendIPConfigurations/appGwPublicFrontendIp')]"
+              },
+              "frontendPort": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appgateway_name')), '/frontendPorts/port_80')]"
+              },
+              "protocol": "Http",
+              "hostNames": [],
+              "requireServerNameIndication": false
+            }
+          }
+        ],
+        "urlPathMaps": [],
+        "requestRoutingRules": [
+          {
+            "name": "default",
+            "properties": {
+              "ruleType": "Basic",
+              "priority": 100,
+              "httpListener": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appgateway_name')), '/httpListeners/new')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appgateway_name')), '/backendAddressPools/capp')]"
+              },
+              "backendHttpSettings": {
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appgateway_name')), '/backendHttpSettingsCollection/https')]"
+              }
+            }
+          }
+        ],
+        "rewriteRuleSets": [],
+        "redirectConfigurations": [],
+        "privateLinkConfigurations": [],
+        "enableHttp2": false,
+        "autoscaleConfiguration": {
+          "minCapacity": 0,
+          "maxCapacity": 10
+        }
+      }
+    }
+  ]
+}
