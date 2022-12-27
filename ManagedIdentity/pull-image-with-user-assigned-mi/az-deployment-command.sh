@@ -12,5 +12,4 @@ az deployment group create \
     azureContainerRegistryImageTag="$AZURE_CONTAINER_REGISTRY_IMAGE_TAG" \
     appInsightsName="$AZURE_APP_INSIGHTS_NAME" \
     logAnalyticsWorkspaceName="$AZURE_LAW_NAME" \
-    acrPullDefinitionId="$ACR_PULL_DEFINITION_ID" \
     userAssignedIdentityName="$USER_ASSIGNED_IDENTITY_NAME"

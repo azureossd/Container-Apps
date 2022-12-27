@@ -16,10 +16,11 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-p
 
 // roleDefinitionId is the ID found here for AcrPull: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#acrpull
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, azureContainerRegistry, 'AcrPullTest')
+  name: guid(resourceGroup().id, azureContainerRegistry, 'AcrPullTestUserAssigned')
   properties: {
     principalId: identity.properties.principalId  
     principalType: 'ServicePrincipal'
+    // acrPullDefinitionId has a value of 7f951dda-4ed3-4680-a7ca-43fe172d538d
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', acrPullDefinitionId)
   }
 }
@@ -52,7 +53,7 @@ resource appEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' =
   name: environmentName
   location: location
   properties: {
-    // daprAIInstrumentationKey:appInsights.properties.InstrumentationKey
+    daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -73,7 +74,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
     }
   }
   properties: {
-    managedEnvironmentId: appEnvironment.id
+    environmentId: appEnvironment.id
     configuration: {
       ingress: {
         targetPort: 8080
@@ -94,8 +95,13 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
           resources: {
             cpu: 1
             memory: '2Gi'
-          }}
+          }
+        }
       ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 1
+      }
     }
   }
 }
