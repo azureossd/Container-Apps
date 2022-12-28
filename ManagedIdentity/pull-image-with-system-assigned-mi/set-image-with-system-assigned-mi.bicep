@@ -3,27 +3,8 @@ param logAnalyticsWorkspaceName string
 param appInsightsName string
 param containerAppName string 
 param azureContainerRegistry string
-param azureContainerRegistryImage string 
-param azureContainerRegistryImageTag string
 param acrPullDefinitionId string
-param userAssignedIdentityName string
 param location string = resourceGroup().location
-
-resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
-  name: userAssignedIdentityName
-  location: location 
-}
-
-// roleDefinitionId is the ID found here for AcrPull: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#acrpull
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, azureContainerRegistry, 'AcrPullTestUserAssigned')
-  properties: {
-    principalId: identity.properties.principalId  
-    principalType: 'ServicePrincipal'
-    // acrPullDefinitionId has a value of 7f951dda-4ed3-4680-a7ca-43fe172d538d
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', acrPullDefinitionId)
-  }
-}
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: logAnalyticsWorkspaceName
@@ -68,30 +49,21 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: containerAppName
   location: location
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${identity.id}': {}
-    }
+    type: 'SystemAssigned'
   }
   properties: {
     environmentId: appEnvironment.id
     configuration: {
       ingress: {
-        targetPort: 8080
+        targetPort: 80
         external: true
       }
-      registries: [
-        {
-          server: '${azureContainerRegistry}.azurecr.io'
-          identity: identity.id
-        }
-      ]
     }
     template: {
       containers: [
         {
-          image: '${azureContainerRegistry}.azurecr.io/${azureContainerRegistryImage}:${azureContainerRegistryImageTag}'
-          name: 'dockercontainersshexamples-dotnet-alpine'
+          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: 'dotnet'
           resources: {
             cpu: 1
             memory: '2Gi'
@@ -103,6 +75,18 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
         maxReplicas: 1
       }
     }
+  }
+}
+
+// roleDefinitionId is the ID found here for AcrPull: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#acrpull
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, azureContainerRegistry, 'AcrPullSystemAssigned')
+  scope: containerApp
+  properties: {
+    principalId: containerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    // acrPullDefinitionId has a value of 7f951dda-4ed3-4680-a7ca-43fe172d538d
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', acrPullDefinitionId)
   }
 }
 
