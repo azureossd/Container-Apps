@@ -74,7 +74,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
     }
   }
   properties: {
-    managedEnvironmentId: appEnvironment.id
+    environmentId: appEnvironment.id
     configuration: {
       ingress: {
         targetPort: 8080
