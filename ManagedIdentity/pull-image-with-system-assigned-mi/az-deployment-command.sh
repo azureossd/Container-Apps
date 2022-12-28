@@ -13,16 +13,4 @@ az deployment group create \
   azureContainerRegistry="$AZURE_CONTAINER_REGISTRY" \
   acrPullDefinitionId="$ACR_PULL_DEFINITION_ID" \
   appInsightsName="$AZURE_APP_INSIGHTS_NAME" \
-  logAnalyticsWorkspaceName="$AZURE_LAW_NAME" &&
-  az deployment group create \
-    --resource-group "$RESOURCE_GROUP" \
-    --template-file ./pull-image-with-system-assigned-mi.bicep \
-    --parameters \
-    environmentName="$CONTAINERAPPS_ENVIRONMENT" \
-    containerAppName="$CONTAINERAPPS_NAME" \
-    azureContainerRegistry="$AZURE_CONTAINER_REGISTRY" \
-    azureContainerRegistryImage="$AZURE_CONTAINER_REGISTRY_IMAGE" \
-    azureContainerRegistryImageTag="$AZURE_CONTAINER_REGISTRY_IMAGE_TAG" \
-    appInsightsName="$AZURE_APP_INSIGHTS_NAME" \
-    logAnalyticsWorkspaceName="$AZURE_LAW_NAME" 
-
+  logAnalyticsWorkspaceName="$AZURE_LAW_NAME" 

@@ -62,7 +62,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
     template: {
       containers: [
         {
-          image: 'nginx'
+          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: 'dotnet'
           resources: {
             cpu: 1
