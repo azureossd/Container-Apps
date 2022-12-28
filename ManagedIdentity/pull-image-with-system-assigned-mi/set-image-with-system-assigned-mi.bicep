@@ -3,8 +3,7 @@ param logAnalyticsWorkspaceName string
 param appInsightsName string
 param containerAppName string 
 param azureContainerRegistry string
-param azureContainerRegistryImage string 
-param azureContainerRegistryImageTag string
+param acrPullDefinitionId string
 param location string = resourceGroup().location
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -56,20 +55,14 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
     environmentId: appEnvironment.id
     configuration: {
       ingress: {
-        targetPort: 8080
+        targetPort: 80
         external: true
       }
-      registries: [
-        {
-          server: '${azureContainerRegistry}.azurecr.io'
-          identity: 'system'
-        }
-      ]
     }
     template: {
       containers: [
         {
-          image: '${azureContainerRegistry}.azurecr.io/${azureContainerRegistryImage}:${azureContainerRegistryImageTag}'
+          image: 'nginx'
           name: 'dotnet'
           resources: {
             cpu: 1
@@ -77,7 +70,6 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
           }
         }
       ]
-      revisionSuffix: 'mi'
       scale: {
         minReplicas: 1
         maxReplicas: 1
@@ -86,5 +78,17 @@ resource containerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   }
 }
 
+// roleDefinitionId is the ID found here for AcrPull: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#acrpull
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, azureContainerRegistry, 'AcrPullSystemAssigned')
+  scope: containerApp
+  properties: {
+    principalId: containerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    // acrPullDefinitionId has a value of 7f951dda-4ed3-4680-a7ca-43fe172d538d
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', acrPullDefinitionId)
+  }
+}
 
-
+output location string = location
+output environmentId string = appEnvironment.id
