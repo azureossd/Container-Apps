@@ -22,11 +22,11 @@
       "defaultValue": "testapp",
       "type": "String"
     },
-    "environmentName": {
+    "environmentId": {
       "type": "string",
-      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[resourceId('Microsoft.App/managedEnvironments', concat('ContainerAppEnv-', uniqueString(resourceGroup().id)))]",
       "metadata": {
-        "description": "The name of the Container App Environment."
+        "description": "The resource id of the Container App Environment."
       }
     }
   },
@@ -54,14 +54,14 @@
     },
     {
       "type": "Microsoft.App/containerapps",
-      "apiVersion": "2022-01-01-preview",
+      "apiVersion": "2023-04-01-preview",
       "name": "[parameters('containerappname')]",
       "location": "[parameters('location')]",
       "identity": {
         "type": "None"
       },
       "properties": {
-        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "managedEnvironmentId": "[parameters('environmentId')]",
         "configuration": {
           "activeRevisionsMode": "Single",
           "ingress": {

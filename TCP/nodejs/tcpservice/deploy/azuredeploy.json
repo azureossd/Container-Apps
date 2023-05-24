@@ -1,0 +1,79 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "environmentId": {
+      "type": "string",
+      "defaultValue": "[resourceId('Microsoft.App/managedEnvironments', concat('ContainerAppEnv-', uniqueString(resourceGroup().id)))]",
+      "metadata": {
+        "description": "The resource id of the Container App Environment."
+      }
+    },
+    "tcpserviceCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/tcpservicenodejs:latest"
+    },
+    "tcpservice": {
+      "type": "string",
+      "defaultValue": "tcpservicenodejs"
+    },
+    "EXPOSED_PORT": {
+      "type": "string",
+      "defaultValue": "6000"
+    }
+  },
+  "variables": {
+    "APP_PORT": "5000"
+  },
+  "resources": [
+    {
+      "name": "[parameters('tcpservice')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-04-01-preview",
+      "location": "[parameters('location')]",
+      "properties": {
+        "managedEnvironmentId": "[parameters('environmentId')]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+			"transport": "Tcp",
+            "targetPort": "[variables('APP_PORT')]",
+			"exposedPort": "[parameters('EXPOSED_PORT')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('tcpservice')]",
+              "image": "[parameters('tcpserviceCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "3",
+            "rules": [
+              {
+                "name": "tcpcalingrule",
+                "tcp": {
+                  "metadata": {
+                    "concurrentRequests": "5"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
