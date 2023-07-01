@@ -64,3 +64,25 @@ The output should resemble the following:
   "message": "Hello, !"
 }
 ```
+
+If you want to monitor the port and protocol used in the Container App, you can use a tool such as netstat from the Container App Console. You will need to scale the Container App to at least one replica to connect to the Console.
+
+To install netstat, run the following commands from the Container App Console:
+
+```
+apt update && apt upgrade -y
+
+apt install net-tools
+```
+
+To use netstat to check the list of processes by port and protocol, run the following command:
+
+```
+netstat -tulpn | grep LISTEN
+```
+
+For this gRPC server, the output should contain a line that resembles the following:
+
+| | | | | | | |
+| - | - |- | - | - | - | - |
+| tcp6 | 0 | 0 | :::50051 | :::`*` | LISTEN | 7/python |
