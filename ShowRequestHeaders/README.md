@@ -3,7 +3,7 @@ This sample Azure Resource Manager template deploys a Container App Environment 
 
 Note: This application is only intended for testing purposes and not for real-world scenarios. Proceed with caution before sending sensitive request headers to this Container App, because the application will return the request headers in the response.
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FShowRequestHeaders%2Fmaster%2Fdeploy%2Fazuredeploy.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FShowRequestHeaders%2Fdeploy%2Fazuredeploy.json)
 
 ### Log Analytics Workspace
 
