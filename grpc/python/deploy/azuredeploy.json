@@ -1,0 +1,89 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+    },
+    "workspaceName": {
+      "type": "string",
+      "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
+    },
+    "workspaceLocation": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "containerappname": {
+      "type": "string",
+      "defaultValue": "grpcserver"
+    },
+    "containerimage": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/grpcserverpython:latest"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-08-01",
+      "name": "[parameters('workspaceName')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "[parameters('workspaceLocation')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('environmentName')]",
+      "type": "Microsoft.App/managedEnvironments",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+      ],
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
+            "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('containerappname')]",
+      "type": "Microsoft.App/containerApps",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "transport": "http2",
+            "targetPort": 50051
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "grocserver",
+              "image": "[parameters('containerimage')]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
