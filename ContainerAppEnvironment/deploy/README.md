@@ -1,7 +1,13 @@
-# Container App Environment with VNET
+# Container App Environment deployment
+This Azure Resource Manager template automates deployment of a Container App Environment.
+
+By default, the template deploys a [workload profile-enabled](https://learn.microsoft.com/azure/container-apps/workload-profiles-overview) internal Azure Container App Environment to an Azure Virtual Network, and deploys a Private DNS Zone for the Container App Environment.
+
+However, you can change the options, such as deploy an external Container App Environment to VNET, not use VNET, not enable workload profiles, not use a Private DNS Zone, and deploy the VNET without deploying the Container App Environment.
+
 This sample Azure Resource Manager template deploys an Azure Container App Environment to an Azure Virtual Network. For more information about deploying a Container App Environment to a virtual network, refer to [this documentation](https://docs.microsoft.com/azure/container-apps/vnet-custom?tabs=powershell&pivots=azure-cli#deploy-with-a-private-dns).
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppInVNET%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppInVNET%2Fdeploy%2Fazuredeploy.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppEnvironment%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FContainerAppEnvironment%2Fdeploy%2Fazuredeploy.json)
 
 ### Log Analytics Workspace
 
@@ -13,6 +19,9 @@ The Container App Environment houses Container Apps. This template gives you the
 - If you set the **deployToVnet** parameter to **true**, the Container App Environment will be deployed to a virtual network.
 - If you set the **deployToVnet** parameter to **false**, the Container App Environment will be deployed without a virtual network.
 - If you set the **deployToVnet** and **internal** parameters to **true**, the Container App Environment will only be reachable privately through the virtual network.
+- If you set the **deployEnvironment** parameter to **false**, the Container App Environment will not be deployed. This setting is useful if you want to deploy and customize the VNET before deploying the Container App Environment.
+- If you set the **workloadProfileEnabled** parameter to **true**, the Container App Environment will be deployed with workload profiles enabled. Only the Consumption workload profile will be included, but you can add other profiles later.
+- If you set the **workloadProfileEnabled** parameter to **false**, the Container App Environment will be deployed without workload profiles enabled.
 
 If you set the **deployToVnet** parameter to **true**, there are three properties that are available to add to the containerAppsConfiguration element of the Container App Environment resource but that are not included in this template:
 - platformReservedCidr
@@ -23,9 +32,11 @@ These properties help ensure that other address ranges in your network infrastru
 
 ### Virtual Network
 
-If you set the **deployToVnet** parameter to **true**, the virtual network will be deployed. The virtual network contains the following subnets, which are necessary for the Container App Environment to function with the virtual network.
+If you set the **deployVnet** parameter to **true** and don't set the **deployToVnet** parameter to **false**, the virtual network will be deployed. The virtual network contains the following subnets, which are necessary for the Container App Environment to function with the virtual network.
 - App subnet: Subnet for user app containers. Subnet that contains IP ranges mapped to applications deployed as containers.
 - Control plane subnet: Subnet for control plane infrastructure components and user app container.
+
+If you set the **deployVnet** parameter to **false** and set the **deployToVnet** parameter to **false**, the Container App Environment will be deployed to the existing VNET, provided that the VNET already exists.
 
 ### Private DNS Zone
 If you set the **deployToVnet**, **internal**, and **privateDNS** parameters to **true**, a private DNS zone will be deployed for the Container App Environment.

@@ -9,6 +9,13 @@
         "description": "The location into which the resources should be deployed."
       }
     },
+    "deployVnet": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployVnet parameter to true, a virtual network will be deployed, unless deployToVnet is set to false. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
+      }
+    },
     "deployToVnet": {
       "type": "bool",
       "defaultValue": true,
@@ -16,11 +23,25 @@
         "description": "If you set the deployToVnet parameter to true, a virtual network will be deployed and the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
       }
     },
+    "deployEnvironment": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployEnvironment parameter to true, a Container App Environment will be deployed. If you want to deploy and make further customizations to the VNET, set deployEnvironment to false."
+      }
+    },
     "internal": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
         "description": "If you set the deployToVnet and internal parameters to true, the Container App Environment will only be reachable privately through the virtual network."
+      }
+    },
+    "workloadProfileEnabled": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the workloadProfileEnabled parameter to true, a workload profile-enabled Container App Environment will be deployed, with a Consumption plan. If you set the workloadProfileEnabled parameter to false, a Consumption-only (non-workload profile-enabled) Container App Environment will be deployed."
       }
     },
     "environmentName": {
@@ -78,7 +99,7 @@
   },
   "resources": [
     {
-      "condition": "[equals(string(parameters('deployToVnet')), 'True')]",
+      "condition": "[and(parameters('deployVnet'), not(equals(parameters('deployToVnet'), 'False')))]",
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-07-01",
       "name": "[parameters('vnetName')]",
@@ -93,7 +114,16 @@
           {
             "name": "[parameters('infrastructureSubnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('infrastructureSubnetAddressPrefix')]"
+              "addressPrefix": "[parameters('infrastructureSubnetAddressPrefix')]",
+              "delegations": [
+                {
+                  "name": "Microsoft.App.environments",
+                  "properties": {
+                    "serviceName": "Microsoft.App/environments"
+                  },
+                  "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+                }
+              ]
             }
           }
         ]
@@ -112,7 +142,8 @@
       }
     },
     {
-      "apiVersion": "2022-10-01",
+      "condition": "[equals(string(parameters('deployEnvironment')), 'True')]",
+      "apiVersion": "2023-05-01",
       "name": "[parameters('environmentName')]",
       "type": "Microsoft.App/managedEnvironments",
       "location": "[parameters('location')]",
@@ -121,7 +152,6 @@
         "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
       ],
       "properties": {
-        "type": "managed",
         "appLogsConfiguration": {
           "destination": "log-analytics",
           "logAnalyticsConfiguration": {
@@ -132,7 +162,10 @@
         "vnetConfiguration": {
           "infrastructureSubnetId": "[if(parameters('deployToVnet'), variables('infrastructureSubnetResourceId'), '')]",
           "internal": "[and(parameters('deployToVnet'), parameters('internal'))]"
-        }
+        },
+        "workloadProfiles": [
+          "[if(parameters('workloadProfileEnabled'), json('{\"workloadProfileType\": \"Consumption\", \"name\": \"Consumption\"}'),  json('null'))]"
+        ]
       }
     }
   ],

@@ -5,7 +5,7 @@ This sample Azure Resource Manager template deploys an Azure Container App that 
 
 ## Prerequisites
 Deploy a Container App Environment and Virtual Network.
-You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppInVNET/deploy) to deploy a Virtual Network and Container App Environment.
+You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/Environment/deploy) to deploy a Virtual Network and Container App Environment.
 
 ## Resources deployed in this template
 ### Container App

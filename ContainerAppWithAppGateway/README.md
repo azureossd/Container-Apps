@@ -5,7 +5,7 @@ This sample Azure Resource Manager template deploys an Azure Container App behin
 
 ## Prerequisites
 Deploy a Container App Environment and Virtual Network.
-You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppInVNET/deploy) to deploy a Virtual Network and [Internal Container App Environment](https://learn.microsoft.com/azure/container-apps/networking) that uses private DNS.
+You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppEnvironment/deploy) to deploy a Virtual Network and [Internal Container App Environment](https://learn.microsoft.com/azure/container-apps/networking) that uses private DNS.
 
 ## Resources deployed in this template
 ### Container App
