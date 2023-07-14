@@ -36,7 +36,7 @@ If you set the **deployVnet** parameter to **true** and don't set the **deployTo
 - App subnet: Subnet for user app containers. Subnet that contains IP ranges mapped to applications deployed as containers.
 - Control plane subnet: Subnet for control plane infrastructure components and user app container.
 
-If you set the **deployVnet** parameter to **false** and set the **deployToVnet** parameter to **false**, the Container App Environment will be deployed to the existing VNET, provided that the VNET already exists.
+If you want to deploy the Container App Environment to an existing VNET, set the **deployVnet** parameter to **false** and set the **deployToVnet** parameter to **true**.
 
 ### Private DNS Zone
 If you set the **deployToVnet**, **internal**, and **privateDNS** parameters to **true**, a private DNS zone will be deployed for the Container App Environment.
