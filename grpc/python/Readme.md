@@ -1,15 +1,11 @@
 # gRPC Server on Container Apps
-This sample Azure Resource Manager template deploys a Container App Environment and a Container App that runs a gRPC server.
+This sample Azure Resource Manager template deploys a Container App that runs a gRPC server.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2Fgrpc%2Fpython%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2Fgrpc%2Fpython%2Fdeploy%2Fazuredeploy.json)
 
-### Log Analytics Workspace
-
-A log Analytics workspace is deployed, which is required for the Container App Environment deployment.
-
-### Container App Environment
-
-The Container App Environment houses the Container Apps.
+### Prerequisites
+Deploy a Container App Environment.
+You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppEnvironment/deploy) to deploy a Container App Environment.
 
 ### Container App
 The application is taken from [https://github.com/r0mk1/grpc-helloworld-reflection-docker](https://github.com/r0mk1/grpc-helloworld-reflection-docker)

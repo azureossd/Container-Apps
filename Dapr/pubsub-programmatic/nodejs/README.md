@@ -1,16 +1,12 @@
 # Dapr pub/sub with Container Apps
 
-This sample Azure Resource Manager template deploys a Container App Environment and three Container Apps which interact with a pub/sub component.
+This sample Azure Resource Manager template deploys three Container Apps which interact with a pub/sub component.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fpubsub-programmatic%2Fnodejs%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fpubsub-programmatic%2Fnodejs%2Fdeploy%2Fazuredeploy.json)
 
-### Log Analytics Workspace
-
-A log Analytics workspace is deployed, which is required for the Container App Environment deployment.
-
-### Container App Environment
-
-The Container App Environment houses the Container Apps.
+### Prerequisites
+Deploy a Container App Environment.
+You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppEnvironment/deploy) to deploy a Container App Environment.
 
 ### Azure Service Bus Topic
 
