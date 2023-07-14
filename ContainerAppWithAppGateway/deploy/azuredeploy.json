@@ -28,6 +28,13 @@
       "metadata": {
         "description": "The resource id of the Container App Environment."
       }
+    },
+    "useConsumptionWorkloadProfile": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you deployed a workload-profile enabled Container App Environment, set the useConsumptionWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
+      }
     }
   },
   "variables": {
@@ -54,7 +61,7 @@
     },
     {
       "type": "Microsoft.App/containerapps",
-      "apiVersion": "2023-04-01-preview",
+      "apiVersion": "2023-05-01",
       "name": "[parameters('containerappname')]",
       "location": "[parameters('location')]",
       "identity": {
@@ -62,6 +69,7 @@
       },
       "properties": {
         "managedEnvironmentId": "[parameters('environmentId')]",
+        "workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "activeRevisionsMode": "Single",
           "ingress": {

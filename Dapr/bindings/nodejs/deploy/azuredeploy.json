@@ -10,14 +10,6 @@
       "type": "string",
       "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
-    "workspaceName": {
-      "type": "string",
-      "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
-    },
-    "workspaceLocation": {
-      "type": "string",
-      "defaultValue": "canadacentral"
-    },
     "bindingappCI": {
       "type": "String",
       "defaultValue": "docker.io/gfakedocker/bindingnodejs:latest"
@@ -64,6 +56,13 @@
       "defaultValue": "mystorequeue1",
       "metadata": {
         "description": "Name of the Storage queue"
+      }
+    },
+    "useConsumptionWorkloadProfile": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you deployed a workload-profile enabled Container App Environment, set the useConsumptionWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
       }
     }
   },
@@ -124,43 +123,10 @@
       ]
     },
     {
-      "apiVersion": "2020-08-01",
-      "name": "[parameters('workspaceName')]",
-      "type": "Microsoft.OperationalInsights/workspaces",
-      "location": "[parameters('workspaceLocation')]",
-      "properties": {
-        "sku": {
-          "name": "PerGB2018"
-        },
-        "retentionInDays": 30
-      }
-    },
-    {
-      "apiVersion": "2022-01-01-preview",
-      "name": "[parameters('environmentName')]",
-      "type": "Microsoft.App/managedEnvironments/",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-      ],
-      "properties": {
-        "type": "managed",
-        "internalLoadBalancerEnabled": false,
-        "appLogsConfiguration": {
-          "destination": "log-analytics",
-          "logAnalyticsConfiguration": {
-            "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
-            "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
-          }
-        }
-      }
-    },
-    {
-      "apiVersion": "2022-01-01-preview",
+      "apiVersion": "2023-05-01",
       "type": "Microsoft.App/managedEnvironments/daprComponents",
       "name": "[concat(parameters('environmentName'), '/', parameters('inputbinding'))]",
       "dependsOn": [
-        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]"
       ],
       "properties": {
@@ -194,11 +160,10 @@
       }
     },
     {
-      "apiVersion": "2022-01-01-preview",
+      "apiVersion": "2023-05-01",
       "type": "Microsoft.App/managedEnvironments/daprComponents",
       "name": "[concat(parameters('environmentName'), '/', parameters('outputbinding'))]",
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts/queueServices/queues', parameters('storageAccountName'), 'default', parameters('storageQueueName'))]"
       ],
       "properties": {
@@ -243,7 +208,7 @@
       "name": "[parameters('bindingapp')]",
       "type": "Microsoft.App/containerApps",
       "kind": "containerapps",
-      "apiVersion": "2022-01-01-preview",
+      "apiVersion": "2023-05-01",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('inputbinding'))]",
@@ -251,6 +216,7 @@
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+		"workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "ingress": {
             "external": true,

@@ -1,11 +1,11 @@
 # System- and User-Assigned Managed Identity with Container Apps
-This sample Azure Resource Manager template deploys a Container App Environment and Container App that gets secrets from KeyVaults via System-Assigned Managed Identity and User-Assigned Managed Identity.
+This sample Azure Resource Manager template deploys a Container App that gets secrets from KeyVaults via System-Assigned Managed Identity and User-Assigned Managed Identity.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FManagedIdentity%2Fdotnet%2FManagedIdentity%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FManagedIdentity%2Fdotnet%2FManagedIdentity%2Fdeploy%2Fazuredeploy.json)
 
-### Log Analytics Workspace
-
-A log Analytics workspace is deployed, which is required for the Container App Environment deployment.
+### Prerequisites
+Deploy a Container App Environment.
+You can use [this template](https://github.com/azureossd/Container-Apps/tree/master/ContainerAppEnvironment/deploy) to deploy a Container App Environment.
 
 ### User-Assigned Managed Identity
 
@@ -15,10 +15,6 @@ A User-Assigned Managed Identity named containerappuseridentity-*uniquestring* w
 A Key Vault with two secrets will be deployed. This Key Vault will have two access policies:
 - A policy that grants Container App's System-Assigned Managed Identity permission to get secrets.
 - A policy that grants the User-Assigned Managed Identity permission to get secrets.
-
-### Container App Environment
-
-The Container App Environment houses the Container Apps.
 
 ### Container App
 A Container App named identityca1-*uniquestring* will be deployed with the following configurations:

@@ -10,14 +10,6 @@
       "type": "string",
       "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
-    "workspaceName": {
-      "type": "string",
-      "defaultValue": "[concat('LAWorkspace-', uniqueString(resourceGroup().id))]"
-    },
-    "workspaceLocation": {
-      "type": "string",
-      "defaultValue": "canadacentral"
-    },
     "httpbackendserviceCI": {
       "type": "string",
       "defaultValue": "docker.io/gfakedocker/daprservicebackendnodejs:latest"
@@ -41,6 +33,13 @@
     "frontendappId": {
       "type": "string",
       "defaultValue": "frontendapp"
+    },
+    "useConsumptionWorkloadProfile": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you deployed a workload-profile enabled Container App Environment, set the useConsumptionWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
+      }
     }
   },
   "variables": {
@@ -48,46 +47,13 @@
   },
   "resources": [
     {
-      "apiVersion": "2020-08-01",
-      "name": "[parameters('workspaceName')]",
-      "type": "Microsoft.OperationalInsights/workspaces",
-      "location": "[parameters('workspaceLocation')]",
-      "properties": {
-        "sku": {
-          "name": "PerGB2018"
-        },
-        "retentionInDays": 30
-      }
-    },
-    {
-      "apiVersion": "2022-01-01-preview",
-      "name": "[parameters('environmentName')]",
-      "type": "Microsoft.App/managedEnvironments",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-      ],
-      "properties": {
-        "internalLoadBalancerEnabled": false,
-        "appLogsConfiguration": {
-          "destination": "log-analytics",
-          "logAnalyticsConfiguration": {
-            "customerId": "[reference(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').customerId]",
-            "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
-          }
-        }
-      }
-    },
-    {
       "name": "[parameters('httpbackendservice')]",
       "type": "Microsoft.App/containerApps",
-      "apiVersion": "2022-01-01-preview",
+      "apiVersion": "2023-05-01",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]"
-      ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+		"workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "ingress": {
             "external": false,
@@ -134,13 +100,14 @@
     {
       "name": "[parameters('httpfrontendservice')]",
       "type": "Microsoft.App/containerApps",
-      "apiVersion": "2022-01-01-preview",
+      "apiVersion": "2023-05-01",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[parameters('httpbackendservice')]"
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+		"workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "ingress": {
             "external": true,
