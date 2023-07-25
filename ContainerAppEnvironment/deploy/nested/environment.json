@@ -115,15 +115,8 @@
             "name": "[parameters('infrastructureSubnetName')]",
             "properties": {
               "addressPrefix": "[parameters('infrastructureSubnetAddressPrefix')]",
-              "delegations": [
-                {
-                  "name": "Microsoft.App.environments",
-                  "properties": {
-                    "serviceName": "Microsoft.App/environments"
-                  },
-                  "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
-                }
-              ]
+              "delegations": "[if(parameters('workloadProfileEnabled'), json('[{\"name\": \"Microsoft.App.environments\", \"properties\": {\"serviceName\": \"Microsoft.App/environments\"}, \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"}]'), json('null'))]"
+
             }
           }
         ]
