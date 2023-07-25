@@ -64,11 +64,11 @@
         "description": "Name of the Topic"
       }
     },
-    "useConsumptionWorkloadProfile": {
+    "usesWorkloadProfile": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "If you deployed a workload-profile enabled Container App Environment, set the useConsumptionWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
+        "description": "If you deployed a workload-profile enabled Container App Environment, set the usesWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
       }
     }
   },
@@ -163,7 +163,7 @@
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
-		"workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
+		"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "ingress": {
             "external": true,
@@ -210,7 +210,7 @@
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
-		"workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
+		"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "secrets": [
             {
@@ -281,7 +281,7 @@
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
-		"workloadProfileName": "[if(parameters('useConsumptionWorkloadProfile'), 'Consumption', json('null'))]",
+		"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "secrets": [
             {
