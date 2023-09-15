@@ -141,7 +141,7 @@
       "type": "Microsoft.App/managedEnvironments",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
         "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
       ],
       "properties": {
