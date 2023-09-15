@@ -38,7 +38,7 @@ helloworld.Greeter
 Run the following to list the avalable methods on the helloworld.Greeter service:
 
 ```
-grpcurl -plaintext grpcserver.icycliff-f9e96c63.canadacentral.azurecontainerapps.io:443 list helloworld.Greeter
+grpcurl -plaintext grpcserver.<ContainerAppEnvironmentFQDNPrefix>.<REGION>.azurecontainerapps.io:443 list helloworld.Greeter
 ```
 
 The output should resemble the following:
