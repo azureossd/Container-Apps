@@ -38,7 +38,7 @@ helloworld.Greeter
 Run the following to list the avalable methods on the helloworld.Greeter service:
 
 ```
-grpcurl -plaintext grpcserver.<ContainerAppEnvironmentFQDNPrefix>.<REGION>.azurecontainerapps.io:443 list helloworld.Greeter
+grpcurl grpcserver.<ContainerAppEnvironmentFQDNPrefix>.<REGION>.azurecontainerapps.io:443 list helloworld.Greeter
 ```
 
 The output should resemble the following:
@@ -50,7 +50,7 @@ helloworld.Greeter.SayHello
 Run the following to invoke the SayHello method:
 
 ```
-grpcurl -plaintext localhost:50051 helloworld.Greeter.SayHello
+grpcurl grpcserver.<ContainerAppEnvironmentFQDNPrefix>.<REGION>.azurecontainerapps.io:443 helloworld.Greeter.SayHello
 ```
 
 The output should resemble the following:
