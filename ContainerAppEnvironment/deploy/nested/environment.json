@@ -165,11 +165,11 @@
   "outputs": {
     "defaultDomain": {
       "type": "string",
-      "value": "[reference(concat('Microsoft.App/managedEnvironments/', parameters('environmentName')), '2022-01-01-preview').defaultDomain]"
+      "value": "[reference(concat('Microsoft.App/managedEnvironments/', parameters('environmentName')), '2023-05-01').defaultDomain]"
     },
     "staticIp": {
       "type": "string",
-      "value": "[reference(concat('Microsoft.App/managedEnvironments/', parameters('environmentName')), '2022-01-01-preview').staticIp]"
+      "value": "[reference(concat('Microsoft.App/managedEnvironments/', parameters('environmentName')), '2023-05-01').staticIp]"
     },
     "vnetId": {
       "type": "string",
