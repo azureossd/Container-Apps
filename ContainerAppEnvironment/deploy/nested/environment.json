@@ -9,18 +9,18 @@
         "description": "The location into which the resources should be deployed."
       }
     },
-    "deployVnet": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "If you set the deployVnet parameter to true, a virtual network will be deployed, unless deployToVnet is set to false. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
-      }
-    },
     "deployToVnet": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
         "description": "If you set the deployToVnet parameter to true, a virtual network will be deployed and the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
+      }
+    },
+    "deployVnet": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployVnet parameter to true, a virtual network will be deployed, unless deployToVnet is set to false. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
       }
     },
     "deployEnvironment": {
@@ -99,7 +99,7 @@
   },
   "resources": [
     {
-      "condition": "[and(parameters('deployVnet'), not(equals(parameters('deployToVnet'), 'False')))]",
+      "condition": "[and(parameters('deployVnet'), not(parameters('deployToVnet')))]",
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-07-01",
       "name": "[parameters('vnetName')]",
