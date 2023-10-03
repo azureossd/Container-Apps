@@ -9,18 +9,18 @@
         "description": "The location into which the resources should be deployed."
       }
     },
-    "deployVnet": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "If you set the deployVnet parameter to true, a virtual network will be deployed, unless deployToVnet is set to false. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
-      }
-    },
     "deployToVnet": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "If you set the deployToVnet parameter to true, a virtual network will be deployed and the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
+        "description": "If you set the deployToVnet parameter to true, the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
+      }
+    },
+    "deployVnet": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set the deployVnet and deployToVnet parameters to true, a virtual network will be deployed. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
       }
     },
     "deployEnvironment": {
@@ -31,8 +31,9 @@
       }
     },
     "internal": {
-      "type": "bool",
-      "defaultValue": true,
+      "type": "string",
+      "defaultValue": "true",
+      "allowedValues": [ "true", "false" ],
       "metadata": {
         "description": "If you set the deployToVnet and internal parameters to true, the Container App Environment will only be reachable privately through the virtual network."
       }
@@ -99,7 +100,7 @@
   },
   "resources": [
     {
-      "condition": "[and(parameters('deployVnet'), not(parameters('deployToVnet')))]",
+      "condition": "[and(parameters('deployVnet'), parameters('deployToVnet'))]",
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-07-01",
       "name": "[parameters('vnetName')]",
@@ -152,10 +153,7 @@
             "sharedKey": "[listKeys(concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
           }
         },
-        "vnetConfiguration": {
-          "infrastructureSubnetId": "[if(parameters('deployToVnet'), variables('infrastructureSubnetResourceId'), '')]",
-          "internal": "[and(parameters('deployToVnet'), parameters('internal'))]"
-        },
+        "vnetConfiguration": "[if(parameters('deployToVnet'), json(concat('{\"infrastructureSubnetId\":\"', variables('infrastructureSubnetResourceId'), '\", \"internal\": ', parameters('internal'), '}')),  json('null'))]",
         "workloadProfiles": [
           "[if(parameters('workloadProfileEnabled'), json('{\"workloadProfileType\": \"Consumption\", \"name\": \"Consumption\"}'),  json('null'))]"
         ]
