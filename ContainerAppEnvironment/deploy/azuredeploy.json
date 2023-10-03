@@ -30,6 +30,7 @@
         "description": "If you set the deployEnvironment parameter to true, a Container App Environment will be deployed. If you want to deploy and make further customizations to the VNET, set deployEnvironment to false."
       }
     },
+    "internal": {
       "type": "string",
       "defaultValue": "true",
       "allowedValues": [ "true", "false" ],
