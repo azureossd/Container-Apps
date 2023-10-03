@@ -13,14 +13,14 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "If you set the deployToVnet parameter to true, a virtual network will be deployed and the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
+        "description": "If you set the deployToVnet parameter to true, the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
       }
     },
     "deployVnet": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "If you set the deployVnet parameter to true, a virtual network will be deployed, unless deployToVnet is set to false. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
+        "description": "If you set the deployVnet and deployToVnet parameters to true, a virtual network will be deployed. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
       }
     },
     "deployEnvironment": {
@@ -30,9 +30,9 @@
         "description": "If you set the deployEnvironment parameter to true, a Container App Environment will be deployed. If you want to deploy and make further customizations to the VNET, set deployEnvironment to false."
       }
     },
-    "internal": {
-      "type": "bool",
-      "defaultValue": true,
+      "type": "string",
+      "defaultValue": "true",
+      "allowedValues": [ "true", "false" ],
       "metadata": {
         "description": "If you set the deployToVnet and internal parameters to true, the Container App Environment will only be reachable privately through the virtual network."
       }
