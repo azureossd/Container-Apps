@@ -32,9 +32,6 @@
 			"name": "multicontainer",
 			"type": "Microsoft.App/containerApps",
 			"location": "[parameters('location')]",
-			"dependsOn": [
-				"[concat('Microsoft.App/managedEnvironments/', parameters('environmentName'))]"
-			],
 			"properties": {
 				"managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
 				"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
