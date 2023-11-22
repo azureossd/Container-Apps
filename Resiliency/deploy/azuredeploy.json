@@ -8,7 +8,7 @@
     },
     "environmentName": {
       "type": "string",
-      "defaultValue": "env1"
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
     "storageAccountName1": {
       "type": "string",
@@ -112,7 +112,7 @@
     },
     "usesWorkloadProfile": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
         "description": "If you deployed a workload-profile enabled Container App Environment, set the usesWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
       }
