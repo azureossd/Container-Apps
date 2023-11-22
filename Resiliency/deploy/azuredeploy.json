@@ -1,0 +1,597 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "env1"
+    },
+    "storageAccountName1": {
+      "type": "string",
+      "defaultValue": "[format('stor1{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Name of the Storage Account"
+      }
+    },
+    "storageQueueName": {
+      "type": "string",
+      "defaultValue": "myq1",
+      "metadata": {
+        "description": "Name of the Storage queue"
+      }
+    },
+    "storageAccountName2": {
+      "type": "string",
+      "defaultValue": "[format('stor2{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Name of the Storage Account"
+      }
+    },
+    "storageBlobContainerName": {
+      "type": "string",
+      "defaultValue": "myblobcontainer1",
+      "metadata": {
+        "description": "Name of the Storage blob container"
+      }
+    },
+    "daprresiliencyCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/daprresiliencydotnet:latest"
+    },
+    "daprresiliency": {
+      "type": "string",
+      "defaultValue": "daprresiliency"
+    },
+    "daprresiliencyId": {
+      "type": "string",
+      "defaultValue": "daprresiliency"
+    },
+    "appresiliencyCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/appresiliencydotnet:latest"
+    },
+    "appresiliency": {
+      "type": "string",
+      "defaultValue": "appresiliency"
+    },
+    "appresiliencyId": {
+      "type": "string",
+      "defaultValue": "appresiliency"
+    },
+    "grpcappresiliency": {
+      "type": "string",
+      "defaultValue": "grpcappresiliency"
+    },
+    "grpcappresiliencyCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/grpcappresiliencydotnet:latest"
+    },
+    "nonappresiliency": {
+      "type": "string",
+      "defaultValue": "nonappresiliency"
+    },
+    "nonappresiliencyId": {
+      "type": "string",
+      "defaultValue": "nonappresiliency"
+    },
+    "clientappCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/appresiliencyclientnodejs:latest"
+    },
+    "clientapp": {
+      "type": "string",
+      "defaultValue": "clientapp"
+    },
+    "inputbinding": {
+      "type": "String",
+      "defaultValue": "mybindingforinput"
+    },
+    "statestore": {
+      "type": "string",
+      "defaultValue": "mystatestore"
+    },
+    "daprresiliencypolicy1": {
+      "type": "string",
+      "defaultValue": "daprrespol1"
+    },
+    "daprresiliencypolicy2": {
+      "type": "string",
+      "defaultValue": "daprrespol2"
+    },
+    "appresiliencypolicy1": {
+      "type": "string",
+      "defaultValue": "apprespol1"
+    },
+    "grpcappresiliencypolicy1": {
+      "type": "string",
+      "defaultValue": "grpcapprespol1"
+    },
+    "usesWorkloadProfile": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "If you deployed a workload-profile enabled Container App Environment, set the usesWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
+      }
+    }
+  },
+  "variables": {
+    "APP_PORT-daprresiliency": "5000",
+    "APP_PORT-appresiliency": "5000",
+    "APP_PORT-nonappresiliency": "5000",
+    "APP_PORT-clientapp": "4000",
+    "APP_PORT-grpcappresiliency": "80",
+    "nonappresiliencyCI": "[parameters('appresiliencyCI')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-04-01",
+      "name": "[parameters('storageAccountName1')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+      "apiVersion": "2021-06-01",
+      "name": "[concat(parameters('storageAccountName1'), '/default/', parameters('storageQueueName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName1'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-04-01",
+      "name": "[parameters('storageAccountName2')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName1'))]"
+      ],
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2021-06-01",
+      "name": "[concat(parameters('storageAccountName2'), '/default/', parameters('storageBlobContainerName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName2'))]"
+      ]
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "type": "Microsoft.App/managedEnvironments/daprComponents",
+      "name": "[concat(parameters('environmentName'), '/', parameters('inputbinding'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/queueServices/queues', parameters('storageAccountName1'), 'default', parameters('storageQueueName'))]"
+      ],
+      "properties": {
+        "componentType": "bindings.azure.storagequeues",
+        "version": "v1",
+        "ignoreErrors": false,
+        "initTimeout": "50s",
+        "secrets": [
+          {
+            "name": "storageaccountnamesecret",
+            "value": "[parameters('storageAccountName1')]"
+          },
+          {
+            "name": "storageaccountkeysecret",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName1')), '2021-06-01').keys[1].value]"
+
+          }
+        ],
+        "metadata": [
+          {
+            "name": "accountName",
+            "secretRef": "storageaccountnamesecret"
+          },
+          {
+            "name": "storageAccessKey",
+            "secretRef": "storageaccountkeysecret"
+          },
+          {
+            "name": "queue",
+            "value": "[parameters('storageQueueName')]"
+          },
+          {
+            "name": "ttlInSeconds",
+            "value": "600"
+          }
+        ],
+        "scopes": [
+          "[parameters('daprresiliencyId')]"
+        ]
+      }
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "type": "Microsoft.App/managedEnvironments/daprComponents",
+      "name": "[concat(parameters('environmentName'), '/', parameters('statestore'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName2'), 'default', parameters('storageBlobContainerName'))]"
+      ],
+      "properties": {
+        "componentType": "state.azure.blobstorage",
+        "version": "v1",
+        "ignoreErrors": false,
+        "initTimeout": "50s",
+        "secrets": [
+          {
+            "name": "storageaccountnamesecret",
+            "value": "[parameters('storageAccountName2')]"
+          },
+          {
+            "name": "storageaccountkeysecret",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName2')), '2021-06-01').keys[1].value]"
+
+          }
+        ],
+        "metadata": [
+          {
+            "name": "accountName",
+            "secretRef": "storageaccountnamesecret"
+          },
+          {
+            "name": "accountKey",
+            "secretRef": "storageaccountkeysecret"
+          },
+          {
+            "name": "containerName",
+            "value": "[parameters('storageBlobContainerName')]"
+          }
+        ],
+        "scopes": [
+          "[parameters('daprresiliencyId')]",
+          "[parameters('appresiliencyId')]",
+          "[parameters('nonappresiliencyId')]"
+        ]
+      }
+    },
+    {
+      "name": "[concat(parameters('environmentName'), '/', parameters('inputbinding'), '/', parameters('daprresiliencypolicy1'))]",
+      "apiVersion": "2023-08-01-preview",
+      "type": "Microsoft.App/managedEnvironments/daprComponents/resiliencyPolicies",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('inputbinding'))]"
+      ],
+      "properties": {
+        "inboundPolicy": {
+          "timeoutPolicy": {
+            "responseTimeoutInSeconds": 5
+          },
+          "httpRetryPolicy": {
+            "maxRetries": 3,
+            "retryBackOff": {
+              "initialDelayInMilliseconds": 1000,
+              "maxIntervalInMilliseconds": 10000
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('environmentName'), '/', parameters('statestore'), '/', parameters('daprresiliencypolicy2'))]",
+      "apiVersion": "2023-08-01-preview",
+      "type": "Microsoft.App/managedEnvironments/daprComponents/resiliencyPolicies",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('statestore'))]",
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents/resiliencyPolicies', parameters('environmentName'), parameters('inputbinding'), parameters('daprresiliencypolicy1'))]"
+      ],
+      "properties": {
+        "outboundPolicy": {
+          "timeoutPolicy": {
+            "responseTimeoutInSeconds": 5
+          },
+          "httpRetryPolicy": {
+            "maxRetries": 3,
+            "retryBackOff": {
+              "initialDelayInMilliseconds": 1000,
+              "maxIntervalInMilliseconds": 10000
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "[parameters('daprresiliency')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-08-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents/resiliencyPolicies', parameters('environmentName'), parameters('statestore'), parameters('daprresiliencypolicy2'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT-daprresiliency')]"
+          },
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT-daprresiliency')]",
+            "appId": "[parameters('daprresiliencyId')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('daprresiliency')]",
+              "image": "[parameters('daprresiliencyCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT-daprresiliency')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "1"
+          }
+        }
+      }
+    },
+    {
+      "name": "[parameters('appresiliency')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-08-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/daprComponents', parameters('environmentName'), parameters('statestore'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT-appresiliency')]"
+          },
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT-appresiliency')]",
+            "appId": "[parameters('appresiliencyId')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('appresiliency')]",
+              "image": "[parameters('appresiliencyCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT-appresiliency')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "3",
+            "rules": [
+              {
+                "name": "httpscalingrule",
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "5"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('appresiliency'), '/', parameters('appresiliencypolicy1'))]",
+      "apiVersion": "2023-08-01-preview",
+      "type": "Microsoft.App/containerApps/resiliencyPolicies",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('appresiliency'))]"
+      ],
+      "properties": {
+        "timeoutPolicy": {
+          "responseTimeoutInSeconds": 5,
+          "connectionTimeoutInSeconds": 1
+        },
+        "httpRetryPolicy": {
+          "maxRetries": 3,
+          "retryBackOff": {
+            "initialDelayInMilliseconds": 1000,
+            "maxIntervalInMilliseconds": 5000
+          },
+          "matches": {
+            "errors": [
+              "retriable-headers",
+              "retriable-status-codes"
+            ],
+            "headers": [
+              {
+                "header": "food",
+                "match": {
+                  "prefixMatch": "home"
+                }
+              }
+            ],
+            "httpStatusCodes": [
+              502,
+              503
+            ]
+          }
+        },
+        "circuitBreakerPolicy": {
+          "consecutiveErrors": 4,
+          "intervalInSeconds": 60,
+          "maxEjectionPercent": 100
+        }
+      }
+    },
+    {
+      "name": "[parameters('clientapp')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-08-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('appresiliency'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT-clientapp')]"
+          },
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT-clientapp')]",
+            "appId": "[parameters('clientapp')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('clientapp')]",
+              "image": "[parameters('clientappCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT-clientapp')]"
+                },
+                {
+                  "name": "upstreamacainternaldomain",
+                  "value": "[replace(reference(resourceId('Microsoft.App/containerApps', parameters('appresiliency'))).configuration.ingress.fqdn, parameters('appresiliency'), concat(parameters('appresiliency'), '.internal'))]"
+                },
+                {
+                  "name": "upstreamacaexternaldomain",
+                  "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appresiliency'))).configuration.ingress.fqdn]"
+                },
+                {
+                  "name": "backendappid",
+                  "value": "[parameters('appresiliency')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "1"
+          }
+        }
+      }
+    },
+    {
+      "name": "[parameters('nonappresiliency')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-08-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('clientapp'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT-nonappresiliency')]"
+          },
+          "dapr": {
+            "enabled": true,
+            "appPort": "[variables('APP_PORT-nonappresiliency')]",
+            "appId": "[parameters('nonappresiliencyId')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('nonappresiliency')]",
+              "image": "[variables('nonappresiliencyCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT-nonappresiliency')]"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2023-08-01-preview",
+      "name": "[parameters('grpcappresiliency')]",
+      "type": "Microsoft.App/containerApps",
+      "location": "[parameters('location')]",
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "transport": "http2",
+            "targetPort": "[variables('APP_PORT-grpcappresiliency')]"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "grpcserver",
+              "image": "[parameters('grpcappresiliencyCI')]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('grpcappresiliency'), '/', parameters('grpcappresiliencypolicy1'))]",
+      "apiVersion": "2023-08-01-preview",
+      "type": "Microsoft.App/containerApps/resiliencyPolicies",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('grpcappresiliency'))]"
+      ],
+      "properties": {
+        "timeoutPolicy": {
+          "responseTimeoutInSeconds": 5,
+          "connectionTimeoutInSeconds": 1
+        },
+        "httpRetryPolicy": {
+          "maxRetries": 3,
+          "retryBackOff": {
+            "initialDelayInMilliseconds": 1000,
+            "maxIntervalInMilliseconds": 5000
+          },
+          "matches": {
+            "errors": [
+              "unavailable"
+            ]
+          }
+        },
+        "circuitBreakerPolicy": {
+          "consecutiveErrors": 4,
+          "intervalInSeconds": 60,
+          "maxEjectionPercent": 99
+        }
+      }
+    }
+  ]
+}
