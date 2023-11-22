@@ -1,5 +1,5 @@
 # Dapr Bindings with Container Apps
-This sample Azure Resource Manager template deploys a Container App Environment and a Container App that uses Dapr bindings.
+This sample Azure Resource Manager template deploys a Container App that uses Dapr bindings.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fbindings%2Fdotnet-sdk%2Fbinding-example-dotnet-sdk%2Fdeploy%2Fazuredeploy.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fazureossd%2FContainer-Apps%2Fmaster%2FDapr%2Fbindings%2Fdotnet-sdk%2Fbinding-example-dotnet-sdk%2Fdeploy%2Fazuredeploy.json)
 

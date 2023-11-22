@@ -6,12 +6,9 @@
       "type": "string",
       "defaultValue": "canadacentral"
     },
-    "environmentId": {
+    "environmentName": {
       "type": "string",
-      "defaultValue": "[resourceId('Microsoft.App/managedEnvironments', concat('ContainerAppEnv-', uniqueString(resourceGroup().id)))]",
-      "metadata": {
-        "description": "The resource id of the Container App Environment."
-      }
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
     "tcpserviceCI": {
       "type": "string",
@@ -43,7 +40,7 @@
       "apiVersion": "2023-04-01-preview",
       "location": "[parameters('location')]",
       "properties": {
-        "managedEnvironmentId": "[parameters('environmentId')]",
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
         "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "ingress": {
