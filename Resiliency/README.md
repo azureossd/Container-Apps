@@ -120,7 +120,7 @@ Note: The appresiliency and nonappresilency apps rely upon access to the second 
 
 If you want to test the Dapr inbound resiliency policy, disable access on the first storage account and then wait a few minutes. This will tend to generate a large number of logs, so you might want to keep this test short. At this time, inbound policies might incur more retries than desired due to other retry policies compounding them.
 
-If the retries are occurring, you will see numerous occurrences of failures for the input binding. E.g.L 
+If the retries are occurring, you will see numerous occurrences of failures for the input binding. E.g.:
 ```
 ContainerAppConsoleLogs_CL
 | where TimeGenerated > ago(10m)
