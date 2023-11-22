@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<p>Choose a resiliency test from the navigation bar.</p> 
+<ul>
+<li>The <b>Timeout test</b> Sleeps for 10 seconds. If the timeout policy (which is 5 seconds) is applied, the request should time out with an error. You can click the back button or reload the main page to return to the main page.</li>
+<li>The <b>Http error test</b> returns a 503 error. If the automatic retry resiliency policy isn't present and does not resolve the 503, you will have to click the back button or reload the main page to return to the main page.</li>
+<li>The <b>Http response header test</b> returns a response header of <b>food: home-fries</b>. If the retry policy for response headers is present, the request will be retried when it returns this response header. If the max retries were to be reached, this page would return an HTTP error. 
+<li><b>Trip circuit breaker</b> returns a 500. Reloading this page (or any page that returns a 5xx error) consecutively will count towards the circuit breaker threshold. Once the circuit breaker threshold is reached (4 consecutive errors, in our configured test), this will cause the whole site to return "No healthy upstream" for the duration of the circuit breaker interval (1 minute in our configured test.</li>
+</ul>
+<p>For the Http error test, Http response header test, and TripTheCircuitBreaker:</p>
+<p>Running a test will increase the retry count, which is stored in an external state store. This app can only accomodate tests by one user since the state is tracked via a single key. If the resiliency component (which is outside this app) successfully works, it should automatically retry and increase the retry count.</p>
+
+<p>To restart a resiliency test, click Reset Retry Count, which will reset the retry count to -1.</p>
+
+<p>Current retry count: @ViewBag.RetryCount</p>
+

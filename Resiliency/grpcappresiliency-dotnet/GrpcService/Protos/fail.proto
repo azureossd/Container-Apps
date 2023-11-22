@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package fail;
+
+// The greeting service definition.
+service FakeFailure {
+  // Sends a failure
+  rpc SayFail (FailureRequest) returns (FailureReply);
+}
+
+// The request message containing the user's name.
+message FailureRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings.
+message FailureReply {
+  string message = 1;
+}
