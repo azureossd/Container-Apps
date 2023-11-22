@@ -63,7 +63,7 @@ curl https://$upstreamacainternaldomain/api/ResetRetryCount --verbose
 curl https://$upstreamacainternaldomain/api/HttpErrorTest --verbose
 ```
 
-Note: after you run the HttpErrorTest test, invoke the ResetRetryCount api to reset the retry count for subsequent tests that involve testing automatic retry counts.
+  Note: after you run the HttpErrorTest test, invoke the ResetRetryCount api to reset the retry count for subsequent tests that involve testing automatic retry counts.
 
 
 - Invoke a request that exceeds the 5-second timeout that is configured on the appresiliency Container App's resiliency policy, which should cause the request to time out with an error:
@@ -76,7 +76,7 @@ curl https://$upstreamacainternaldomain/api/TimeOutTest --verbose
 curl https://$upstreamacainternaldomain/api/ResponseHeaderTest --verbose
 ```
 
-Returns a 500 error. Make four consecutive requests to this endpoint to trigger the circuit breaker, which will cause the whole appresiliency Container App site to return "No healthy upstream" for the duration of the configured circuit breaker interval (which is 1 minute).
+- Returns a 500 error. Make four consecutive requests to this endpoint to trigger the circuit breaker, which will cause the whole appresiliency Container App site to return "No healthy upstream" for the duration of the configured circuit breaker interval (which is 1 minute).
 
 ```
 curl https://$upstreamacainternaldomain/api/TripTheCircuitBreaker --verbose
