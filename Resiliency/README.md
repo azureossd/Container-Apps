@@ -63,9 +63,6 @@ curl https://$upstreamacainternaldomain/api/ResetRetryCount --verbose
 curl https://$upstreamacainternaldomain/api/HttpErrorTest --verbose
 ```
 
-  Note: after you run the HttpErrorTest test, invoke the ResetRetryCount api to reset the retry count for subsequent tests that involve testing automatic retry counts.
-
-
 - Invoke a request that exceeds the 5-second timeout that is configured on the appresiliency Container App's resiliency policy, which should cause the request to time out with an error:
 ```
 curl https://$upstreamacainternaldomain/api/TimeOutTest --verbose
@@ -81,6 +78,9 @@ curl https://$upstreamacainternaldomain/api/ResponseHeaderTest --verbose
 ```
 curl https://$upstreamacainternaldomain/api/TripTheCircuitBreaker --verbose
 ```
+
+Note: after you run a HttpErrorTest, ResponseHeaderTest, or TripTheCircuitBreaker to completion, invoke the ResetRetryCount api to reset the retry count for subsequent tests that involve testing automatic retry counts.
+
 
 ##### gRPC over HTTP2 test
 
