@@ -18,13 +18,12 @@ The docker images are already built and publically accessible and configured as 
 To demonstrate that the frontend container is able to communicate with the backend container, make a request to the following URL (replacing *ContainerAppName*.*FQDNSuffix* with your Container App's domain):
 https://*ContainerAppName*.*FQDNSuffix*/frontendpoint
 
-THE FOLLOWING IS DEPRECATED AND WILL BE UPDATED SOON.
 ### CLI deployment for multi-container Container Apps
-[At the time of this writing](https://github.com/microsoft/azure-container-apps/wiki/Known-Issues-for-public-preview), the CLI assumes that you are working with a single container. For multiple containers, you must supply a yaml configuration and use the --yaml argument.
+To deploy multi-contain Container App, supply a yaml configuration and use the --yaml argument.
 
 The containerapp.yaml file provided in the deploy folder can be used to deploy the above-mentioned Container App:
 1. Deploy a Container App Environment if you don't already have one. Refer to [this documentation](https://docs.microsoft.com/azure/container-apps/get-started?tabs=bash) for instructions on how to deploy a Container App Environment via CLI.
-2. Replace the <SubscriptionId> <ResourceGroupName> <ContainerAppEnvironmentName> values with the respective values for your Container App Environment.
+2. Replace the <SubscriptionId>, <ResourceGroupName>, <ContainerAppEnvironmentName>a, and <RegionName> values with the respective values for your Container App Environment.
 3. Replace the <ResourceGroupName> and <ContainerAppName> values in the following command, and then run the command from the directory that contains the deploy folder:
 
 ```
