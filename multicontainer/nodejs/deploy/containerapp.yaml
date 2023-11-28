@@ -1,20 +1,22 @@
-configuration:
-  activeRevisionsMode: multiple
-template:
-  containers:
-  - name: httpservice1nodejs
-    image: docker.io/gfakedocker/multicontainerfrontendnodejs:latest
-    env:
-    - name: APP_PORT
-      value: 4000
-  - name: httpservice2nodejs
-    image: docker.io/gfakedocker/multicontainerbackendnodejs:latest
-    env:
-    - name: APP_PORT
-      value: 5000
-kubeEnvironmentId: /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.Web/kubeEnvironments/<ContainerAppEnvironmentName>
-configuration:
-  activeRevisionsMode: multiple
-  ingress:
-    external: true
-    targetPort: 4000
+location: <RegionName>  
+type: Microsoft.App/containerApps 
+properties: 
+  managedEnvironmentId: /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.App/managedEnvironments/<ContainerAppEnvironmentName>
+  configuration:
+    activeRevisionsMode: Multiple
+    ingress:
+      external: true
+      allowInsecure: false 
+      targetPort: 4000
+  template:
+    containers:
+    - name: httpservice1nodejs
+      image: docker.io/gfakedocker/multicontainerfrontendnodejs:latest
+      env:
+      - name: APP_PORT
+        value: 4000
+    - name: httpservice2nodejs
+      image: docker.io/gfakedocker/multicontainerbackendnodejs:latest
+      env:
+      - name: APP_PORT
+        value: 5000
