@@ -10,6 +10,27 @@
       "type": "string",
       "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
+    "deployTcpService": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set this parameter to true, the TCP service ACA will be deployed."
+      }
+    },
+    "useExternalIngress": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "By default, this parameter will deploy the TCP service ACA with External ingress enabled. If you set this parameter to false, the TCP service ACA will use Internal ingress."
+      }
+    },
+    "deployTcpClient": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you set this parameter to true, the TCP client ACA will be deployed."
+      }
+    },
     "tcpserviceCI": {
       "type": "string",
       "defaultValue": "docker.io/gfakedocker/tcpservicenodejs:latest"
@@ -17,6 +38,14 @@
     "tcpservice": {
       "type": "string",
       "defaultValue": "tcpservicenodejs"
+    },
+    "tcpclientCI": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/tcpclientnodejs:latest"
+    },
+    "tcpclient": {
+      "type": "string",
+      "defaultValue": "tcpclientnodejs"
     },
     "EXPOSED_PORT": {
       "type": "string",
@@ -31,10 +60,12 @@
     }
   },
   "variables": {
-    "APP_PORT": "5000"
+    "APP_PORT_SERVICE": "5000",
+    "APP_PORT_CLIENT": "4000"
   },
   "resources": [
     {
+      "condition": "[parameters('deployTcpService')]",
       "name": "[parameters('tcpservice')]",
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2023-04-01-preview",
@@ -44,10 +75,10 @@
         "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
         "configuration": {
           "ingress": {
-            "external": true,
-			"transport": "Tcp",
-            "targetPort": "[variables('APP_PORT')]",
-			"exposedPort": "[parameters('EXPOSED_PORT')]"
+            "external": "[parameters('useExternalIngress')]",
+            "transport": "Tcp",
+            "targetPort": "[variables('APP_PORT_SERVICE')]",
+            "exposedPort": "[parameters('EXPOSED_PORT')]"
           }
         },
         "template": {
@@ -58,7 +89,7 @@
               "env": [
                 {
                   "name": "APP_PORT",
-                  "value": "[variables('APP_PORT')]"
+                  "value": "[variables('APP_PORT_SERVICE')]"
                 }
               ]
             }
@@ -76,6 +107,35 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "condition": "[parameters('deployTcpClient')]",
+      "name": "[parameters('tcpclient')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-04-01-preview",
+      "location": "[parameters('location')]",
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "template": {
+          "containers": [
+            {
+              "name": "[parameters('tcpclient')]",
+              "image": "[parameters('tcpclientCI')]",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "[variables('APP_PORT_CLIENT')]"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": "1",
+            "maxReplicas": "1"
           }
         }
       }
