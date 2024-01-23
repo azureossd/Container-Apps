@@ -16,7 +16,7 @@ You can optionally deploy either or both of the following Container Apps:
 ## Testing the TCP service
 
 ### From the TCP client ACA
-For the sake of this test, we will test connectivity to the TCP service via its external ingress FQDN.
+In the following example, we will test connectivity to the TCP service via its external ingress FQDN. If using internal Ingress, use the name of the Container App (e.g. tcpservicenodejs ) instead of the FQDN.
 
 1. Make note of the ingress FQDN of the TCP service ACA. The FQDN will resemble tcpservicenodejs.ENVIRONMENT_PREFIX.ENVIRONMENT_REGION.azurecontainerapps.io
 2. [Connect to the Console](https://learn.microsoft.com/azure/container-apps/container-console?tabs=bash#azure-portal) on the TCP client.
@@ -55,6 +55,7 @@ ncat ENVIRONMENT_INBOUND_IP_ADDRESS 6000 < PATH_TO_TEXT_FILE
 
 If the message is successfully processed, you should receive a response that contains the text you sent. You can use the -v switch with NCAT to see further details about the request.
 
+### Check the logs
 You can also check the Container App logs to verify that the message was received, or whether there were related errors. Refer to the [documentation](https://learn.microsoft.com/en-us/azure/container-apps/log-options) for logging options and how to use logging with Container Apps. If using the default Log Analytics option for Container Apps, you can use a query such as the following to check the application logs.
 
 ```
