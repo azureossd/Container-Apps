@@ -11,14 +11,14 @@
     },
     "deployToVnet": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "If you set the deployToVnet parameter to true, the Container App Environment will be deployed to the virtual network. If you set the deployToVnet parameter to false, the Container App Environment will deployed without a virtual network."
       }
     },
     "deployVnet": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "If you set the deployVnet and deployToVnet parameters to true, a virtual network will be deployed. If you want to use an existing VNET that contains subnets with configurations other than what is provided, set deployVnet to false to avoid deployment failures."
       }
@@ -32,7 +32,7 @@
     },
     "internal": {
       "type": "string",
-      "defaultValue": "true",
+      "defaultValue": "false",
       "allowedValues": [ "true", "false" ],
       "metadata": {
         "description": "If you set the deployToVnet and internal parameters to true, the Container App Environment will only be reachable privately through the virtual network."
@@ -47,7 +47,7 @@
     },
     "privateDNS": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "If you set the deployToVnet, internal, and privateDNS parameters to true, a private DNS zone will be deployed for the Container App Environment."
       }
