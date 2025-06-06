@@ -1,0 +1,27 @@
+customDomains:
+  - name: "gfakehostname1.com" 
+# certificateId: "<CERTIFICATE_ID>"
+    bindingType: "Auto" # Can also be "Disabled", "Auto"
+rules:
+  - description: "Routing to backendapp1"
+    routes:
+      - match:
+          prefix: "/givemeabiscuit"
+        action:
+          prefixRewrite: "/biscuits"
+      - match:
+          prefix: "/i/like/donuts"
+        action:
+          prefixRewrite: "/donuts/maple"
+    targets:
+      - containerApp: "backendapp1"
+  - description: "Routing to backendapp2"
+    routes:
+      - match:
+          prefix: "/givemesomegravy"
+        action:
+          prefixRewrite: "/gravy"
+      - match:
+          prefix: "/givemesomemoregravy"
+    targets:
+      - containerApp: "backendapp2"

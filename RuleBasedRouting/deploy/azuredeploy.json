@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "defaultValue": "canadacentral",
+      "type": "String"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+    },
+    "containerapp1CI": {
+      "type": "String",
+      "defaultValue": "docker.io/gfakedocker/rulebasedroutingbackend1:latest"
+    },
+    "containerapp2CI": {
+      "type": "String",
+      "defaultValue": "docker.io/gfakedocker/rulebasedroutingbackend2:latest"
+    },
+    "containerapp1": {
+      "type": "String",
+      "defaultValue": "backendapp1"
+    },
+    "containerapp2": {
+      "type": "String",
+      "defaultValue": "backendapp2"
+    },
+    "usesWorkloadProfile": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "If you deployed a workload-profile enabled Container App Environment, set the usesWorkloadProfile parameter to true so that the Container App is deployed to the Consumption profile. Otherwise, if you deployed a Container App Environment without workload profiles enabled, set this parameter to false."
+      }
+    }
+  },
+  "variables": {
+    "APP_PORT": "4000"
+  },
+  "resources": [
+    {
+      "name": "[parameters('containerapp1')]",
+      "type": "Microsoft.App/containerApps",
+      "kind": "containerapps",
+      "apiVersion": "2025-01-01",
+      "location": "[parameters('location')]",
+
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+		"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT')]"
+          },
+          "containers": [
+            {
+              "name": "[parameters('containerapp1')]",
+              "image": "[parameters('containerapp1CI')]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[parameters('containerapp2')]",
+      "type": "Microsoft.App/containerApps",
+      "kind": "containerapps",
+      "apiVersion": "2025-01-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.App/containerApps/', parameters('containerapp1'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
+		"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": "[variables('APP_PORT')]"
+          },
+          "containers": [
+            {
+              "name": "[parameters('containerapp2')]",
+              "image": "[parameters('containerapp2CI')]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
