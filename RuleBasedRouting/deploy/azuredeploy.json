@@ -44,7 +44,6 @@
       "kind": "containerapps",
       "apiVersion": "2025-01-01",
       "location": "[parameters('location')]",
-
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environmentName'))]",
 		"workloadProfileName": "[if(parameters('usesWorkloadProfile'), 'Consumption', json('null'))]",
@@ -52,13 +51,16 @@
           "ingress": {
             "external": true,
             "targetPort": "[variables('APP_PORT')]"
-          },
-          "containers": [
+          }
+        },
+        "template": {		
+		    "containers": [
             {
-              "name": "[parameters('containerapp1')]",
-              "image": "[parameters('containerapp1CI')]"
+              "name": "[parameters('containerapp2')]",
+              "image": "[parameters('containerapp2CI')]"
             }
           ]
+		}
         }
       }
     },
@@ -78,14 +80,16 @@
           "ingress": {
             "external": true,
             "targetPort": "[variables('APP_PORT')]"
-          },
-          "containers": [
+          }
+        },
+        "template": {		
+		    "containers": [
             {
               "name": "[parameters('containerapp2')]",
               "image": "[parameters('containerapp2CI')]"
             }
           ]
-        }
+		}
       }
     }
   ]
