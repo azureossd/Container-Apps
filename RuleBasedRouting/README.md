@@ -1,4 +1,4 @@
-Rule-based routing with Container Apps via custom domain
+If yoRule-based routing with Container Apps via custom domain
 
 This sample Azure Resource Manager template deploys two Container Apps to route traffic to, using rule-based routing.
 
@@ -20,11 +20,13 @@ After completing the prerequisites and completing the deployment of the Containe
     ```
 	az containerapp env http-route-config create --resource-group YourResourceGroup --name YourManagedEnvironmentName --http-route-config-name routingrule1 --yaml routing_rules1.yml
     ```	
-4. For each domain, bind a certificate to the environment. You can use the Az CLI to do this. E.g.:
+4. For each domain, bind a certificate to the environment. If you want to use managed certificate(s), you can use the Az CLI to do this. E.g.:
 
 ```
 az containerapp env certificate create -g YourResourceGroup --name YourManagedEnvironmentName --certificate-name GiveItAFriendlyName --hostname YourCustomDomain --validation-method HTTP
 ```
+
+5. If you are using your own certificate(s), set the bindingType in the yml(s) to "SniEnabled" and then reapply the rule(s). If you are using managed certificates, skip this step.
 
 Note: Even after the certificate is successfully added, it may take several minutes before it is provisioned. In the meantime, you might get ERR_CONNECTION_RESET or a similar message when you try to access the custom domain.
 After the certificate is provisioned, you will get 404/Not found if you request a route that doesn't exist, such as the / (root) route.
