@@ -1,4 +1,4 @@
-If yoRule-based routing with Container Apps via custom domain
+Rule-based routing with Container Apps via custom domain
 
 This sample Azure Resource Manager template deploys two Container Apps to route traffic to, using rule-based routing.
 
