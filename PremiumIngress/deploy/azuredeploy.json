@@ -1,0 +1,93 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "defaultValue": "canadacentral",
+      "type": "String",
+      "metadata": {
+        "description": "The location into which the resources should be deployed."
+      }
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the Container App Environment."
+      }
+    },
+    "ingressWorkloadProfileName": {
+      "type": "string",
+      "defaultValue": "ingresswp",
+      "metadata": {
+        "description": "The name of the workload profile that will be used for Premium Ingress scaling. This workload profile should not contain any resources."
+      }
+    },
+    "ingressWorkloadProfileType": {
+      "type": "string",
+      "defaultValue": "D4",
+      "metadata": {
+        "description": "The type of workload profile that will be used for Premium Ingress scaling"
+      }
+    },
+    "ingressWorkloadProfileMinimumCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "The type of workload profile that will be used for Premium Ingress scaling"
+      }
+    },
+    "ingressWorkloadProfileMaximumCount": {
+      "type": "int",
+      "defaultValue": 4,
+      "metadata": {
+        "description": "The type of workload profile that will be used for Premium Ingress scaling"
+      }
+    },
+    "terminationGracePeriodSeconds": {
+      "type": "int",
+      "defaultValue": 600,
+      "metadata": {
+        "description": "The grace period for terminating current requests when ingress is shutting down"
+      }
+    },
+    "headerCountLimit": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "The maximum number of headers to allow in a request"
+      }
+    },
+    "requestIdleTimeout": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "The number of minutes that an idle request can run before being terminating."
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2025-02-02-preview",
+      "name": "[parameters('environmentName')]",
+      "type": "Microsoft.App/managedEnvironments",
+      "location": "[parameters('location')]",
+      "properties": {
+          "workloadProfiles": [
+            {
+              "name": "[parameters('ingressWorkloadProfileName')]",
+              "workloadProfileType": "[parameters('ingressWorkloadProfileType')]",
+              "minimumCount": "[parameters('ingressWorkloadProfileMinimumCount')]",
+              "maximumCount": "[parameters('ingressWorkloadProfileMaximumCount')]"
+            }
+          ],
+        "ingressConfiguration": {
+          "workloadProfileName": "[parameters('ingressWorkloadProfileName')]",
+          "terminationGracePeriodSeconds": "[parameters('terminationGracePeriodSeconds')]",
+          "headerCountLimit": "[parameters('headerCountLimit')]",
+          "requestIdleTimeout": "[parameters('requestIdleTimeout')]"
+        }
+      }
+    }
+  ]
+}
