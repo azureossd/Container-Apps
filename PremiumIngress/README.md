@@ -1,6 +1,6 @@
 Premium Ingress for Container Apps
 
-This sample Azure Resource Manager template deploys a Container App Environment [Premium Ingress] workload profile and configuration.
+This sample Azure Resource Manager template deploys a Container App Environment [Premium Ingress](https://learn.microsoft.com/azure/container-apps/ingress-environment-configuration#premium-ingress-mode) workload profile and configuration.
 
 **WARNING**: If you have existing workload profiles in your Container App Environment that you wish to keep, add them to the workloadProfiles section of the template. Deploying this template as-is will attempt to remove existing dedicated workload profiles from the Environment.
 
