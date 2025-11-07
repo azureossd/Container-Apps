@@ -20,7 +20,7 @@ This example creates the following resources:
 Run the following command to apply the configuration:
 
 ```bash
-terraform apply -var-file="systemassigned-template.tf"
+terraform apply
 ```
 
 ---
@@ -47,21 +47,30 @@ Until the issue is fully resolved, follow these steps:
 Use a default image (`mcr.microsoft.com/k8se/quickstart:latest`) without a custom registry/image.  
 This step ensures the System Managed Identity is created with the correct permissions.
 
-Apply the following file:
+Apply the following commands:
 
-```bash
-terraform apply -var-file="systemassigned-default.tf"
 ```
+cd default
+terraform init
+terraform apply
+```
+**Important:** There is no direct command like terraform apply `file.tf` because Terraform treats the entire directory as the configuration set.
 
 ---
 
 ### **Step 2: Switch to Custom Registry/Image**
 Update the Container App to use your custom registry/image and reapply changes.
 
-Apply the following file:
+Apply the following commands:
 
-```bash
-terraform apply -var-file="systemassigned-template.tf"
+```
+cd ..
+terraform init
+
+# run 'terraform import azurerm_container_app_environment.env "full-environment-resource-id"' if required / prompted
+# run 'terraform import azurerm_container_app.app "full-app-resource-id"' if required / prompted
+
+terraform apply
 ```
 
 > **Note:** You can use your own template, but ensure all required elements are included.
