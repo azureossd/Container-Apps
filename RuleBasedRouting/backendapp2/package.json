@@ -10,7 +10,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^5.2.1",
-    "parse5": "^6.0.1",
+    "parse5": "^8.0.0",
     "request": "^2.88.2"
   }
 }
