@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapr.Actors" Version="1.0.0" />
+    <PackageReference Include="Dapr.Actors" Version="1.11.0" />
   </ItemGroup>
 
   <ItemGroup>
