@@ -1,0 +1,73 @@
+name: Auto-merge Dependabot PRs
+# Check if an exiting pull request was made by Dependabot, and if so, approve and enable auto-merge for the PR.
+# Or, run this on any net-new dependabot PRs, and approve/enable auto-merge for those PRs.
+on:
+  pull_request:
+    types: [opened, synchronize]
+    # match dependabot branches
+    # match main branch
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Job for new Dependabot PRs (triggered by pull_request events)
+  dependabot:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' && github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Approve a PR
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --admin --rebase "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  # Job for processing all existing Dependabot PRs (triggered manually)
+  process-existing-dependabot-prs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Process all open Dependabot PRs
+        run: |
+          echo "Fetching all open Dependabot PRs..."
+          # Get all open PRs authored by dependabot[bot]
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --author "app/dependabot" --state open --json number,url --jq '.[].url')
+
+          if [ -z "$prs" ]; then
+            echo "No open Dependabot PRs found."
+            exit 0
+          fi
+
+          echo "Found the following Dependabot PRs:"
+          echo "$prs"
+          echo ""
+
+          # Loop through each PR and approve + enable auto-merge
+          for pr_url in $prs; do
+            echo "Processing: $pr_url"
+
+            # Approve the PR
+            echo "  Approving..."
+            gh pr review --approve "$pr_url" || echo "  Warning: Could not approve (may already be approved)"
+
+            # Enable auto-merge
+            echo "  Enabling auto-merge..."
+            gh pr merge --admin --rebase "$pr_url" || echo "  Warning: Could not enable auto-merge (may already be enabled or have conflicts)"
+
+            echo "  Done."
+            echo ""
+          done
+
+          echo "Finished processing all Dependabot PRs."
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
