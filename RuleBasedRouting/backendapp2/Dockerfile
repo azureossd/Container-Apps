@@ -1,5 +1,5 @@
 # FROM node:current-alpine
-FROM node:23.11.0-alpine3.20
+FROM node:24.1.0-alpine3.20
 COPY . /app1
 WORKDIR /app1
 RUN npm install
