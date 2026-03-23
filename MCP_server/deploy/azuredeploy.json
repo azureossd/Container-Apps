@@ -12,7 +12,6 @@
     },
     "mcp-api-key": {
       "type": "string",
-      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]",
        "metadata": {
         "description": "Provide an arbitrary value for the MCP key. You will need to use the same key in the client that you use to connect to the MCP server. It is recommended to provide a relatively complex, random key for better security than a simple string."
       }
