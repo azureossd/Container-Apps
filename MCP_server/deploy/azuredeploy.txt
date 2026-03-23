@@ -1,0 +1,67 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "canadacentral"
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
+    },
+    "mcp-api-key": {
+      "type": "string",
+      "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]",
+       "metadata": {
+        "description": "Provide an arbitrary value for the MCP key. You will need to use the same key in the client that you use to connect to the MCP server. It is recommended to provide a relatively complex, random key for better security than a simple string."
+      }
+    },
+    "containerimage": {
+      "type": "string",
+      "defaultValue": "docker.io/gfakedocker/healthcheckmcpdemo:latest"
+    },
+    "workloadProfileName": {
+      "type": "string",
+      "defaultValue": "Consumption"
+    }
+  },
+  "resources": [
+        {
+            "apiVersion": "2026-01-01",
+            "name": "multicontainer",
+            "type": "Microsoft.App/containerApps",
+            "location": "[parameters('location')]",
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+                "workloadProfileName": "[parameters('workloadProfileName')]",
+                "configuration": {
+                    "ingress": {
+                        "external": true,
+                        "targetPort": 8080
+                    },
+                    "secrets": [
+                    {
+                        "name": "mcp-api-key",
+                        "value": "[parameters('mcp-api-key')]"
+                    }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "name": "mcpserver",
+                            "image": "[parameters('containerimage')]",
+                            "env": [
+                                {
+                                  "name": "MCP_API_KEY",
+                                  "secretRef": "mcp-api-key"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
