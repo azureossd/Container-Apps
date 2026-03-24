@@ -11,7 +11,7 @@
       "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
     "mcp-api-key": {
-      "type": "string",
+      "type": "SecureString",
        "metadata": {
         "description": "Provide an arbitrary value for the MCP key. You will need to use the same key in the client that you use to connect to the MCP server. It is recommended to provide a relatively complex, random key for better security than a simple string."
       }
@@ -28,7 +28,7 @@
   "resources": [
         {
             "apiVersion": "2026-01-01",
-            "name": "multicontainer",
+            "name": "mcp",
             "type": "Microsoft.App/containerApps",
             "location": "[parameters('location')]",
             "properties": {
