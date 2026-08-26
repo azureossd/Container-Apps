@@ -212,3 +212,7 @@ volume's contents into the snapshot.
 
 The Blob checkpoint is deliberately not loaded during resume. That keeps the
 memory-resume proof independent from the durable-volume proof.
+
+## Testing Egress policies
+
+Curl is installed in the container disk image that the sandbox will use. If you create egress poicies on your sandbox, you can use curl from the sandbox's console to verify the effect of the egress policies (e.g. whether the request succeeds or gets denied (403)).
