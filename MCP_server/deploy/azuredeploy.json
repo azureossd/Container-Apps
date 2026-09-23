@@ -10,6 +10,10 @@
       "type": "string",
       "defaultValue": "[concat('ContainerAppEnv-', uniqueString(resourceGroup().id))]"
     },
+    "containerAppName": {
+      "type": "string",
+      "defaultValue": "mcp"
+    },
     "mcp-api-key": {
       "type": "SecureString",
        "metadata": {
@@ -28,7 +32,7 @@
   "resources": [
         {
             "apiVersion": "2026-01-01",
-            "name": "mcp",
+            "name": "[parameters('containerAppName')]",
             "type": "Microsoft.App/containerApps",
             "location": "[parameters('location')]",
             "properties": {
