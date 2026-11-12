@@ -1,4 +1,4 @@
-FROM python:3.15.1
+FROM python:3.16.0a1
 
 RUN pip install grpcio grpcio-reflection
 
